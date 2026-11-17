@@ -1,0 +1,43 @@
+name: Papelera Pokémon GO
+
+on:
+  schedule:
+    - cron: '17 5 * * *'   # todos los días a las 05:17 UTC (06:17 en España en invierno)
+  workflow_dispatch:        # botón "Run workflow" para generarla cuando quieras
+
+permissions:
+  contents: write
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar datos de PvPoke y del game master
+        run: |
+          set -e
+          PV=https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data
+          GM=https://raw.githubusercontent.com/PokeMiners/game_masters/master/latest
+          mkdir -p data/pvpoke/rankings/little/overall data/pvpoke/rankings/all/overall data/gm
+          curl -fsSL --retry 3 "$PV/gamemaster.json" -o data/pvpoke/gamemaster.json
+          for f in little/overall/rankings-500.json all/overall/rankings-1500.json \
+                   all/overall/rankings-2500.json all/overall/rankings-10000.json; do
+            curl -fsSL --retry 3 "$PV/rankings/$f" -o "data/pvpoke/rankings/$f"
+          done
+          curl -fsSL --retry 3 "$GM/latest.json" -o data/gm/latest.json
+          curl -fsSL --retry 3 "$GM/timestamp.txt" -o data/gm/timestamp.txt
+
+      - name: Generar la cadena y la página
+        run: python3 generar_papelera.py data/pvpoke data/gm/latest.json data/gm/timestamp.txt
+
+      - name: Comprobar la cadena
+        run: python3 comprobar.py
+
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git commit -m "Papelera $(date -u +%F)" || echo "Sin cambios"
+          git push

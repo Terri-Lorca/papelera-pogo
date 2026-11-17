@@ -1,0 +1,11 @@
+{
+  "top_pvp": {
+    "liga_500": 50,
+    "super_ball": 50,
+    "ultra_ball": 50,
+    "master_ball": 30
+  },
+  "top_atacantes_por_tipo": 10,
+  "siempre_guardar": ["skwovet"],
+  "estrellas_papelera": "0*,1*,2*,3*"
+}
