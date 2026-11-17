@@ -28,8 +28,11 @@ jobs:
           curl -fsSL --retry 3 "$GM/latest.json" -o data/gm/latest.json
           curl -fsSL --retry 3 "$GM/timestamp.txt" -o data/gm/timestamp.txt
 
-      - name: Generar la cadena y la página
+      - name: Preparar los datos y la página
         run: python3 generar_papelera.py data/pvpoke data/gm/latest.json data/gm/timestamp.txt
+
+      - name: Construir la cadena del atajo (config.json)
+        run: node construir.js
 
       - name: Comprobar la cadena
         run: python3 comprobar.py

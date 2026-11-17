@@ -1,4 +1,7 @@
 {
+  "estrellas_papelera": [0, 1, 2, 3],
+  "pc_maximo": 2000,
+  "pvp_minimo": 95,
   "top_pvp": {
     "liga_500": 50,
     "super_ball": 50,
@@ -6,6 +9,24 @@
     "master_ball": 30
   },
   "top_atacantes_por_tipo": 10,
+  "ataque_minimo_atacantes": 11,
   "siempre_guardar": ["skwovet"],
-  "estrellas_papelera": "0*,1*,2*,3*"
+  "proteger": {
+    "variocolor": true,
+    "oscuro": true,
+    "legendario": true,
+    "singular": true,
+    "ultraentes": true,
+    "disfraz": true,
+    "fondo": true,
+    "dinamax": true,
+    "gigamax": true,
+    "especial": true,
+    "intercambiados": true,
+    "etiquetados": true,
+    "listos_para_liga": false,
+    "nundos": false,
+    "tamanos": false,
+    "evolucionables": false
+  }
 }

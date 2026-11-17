@@ -1,55 +1,49 @@
-# Papelera Pokémon GO
+# Papelera de Pokémon GO
 
-Genera cada día una cadena de búsqueda para transferir en masa lo que no te sirve. La publica en una página con botón **Copiar** y en un `cadena.txt` que puedes copiar con un Atajo del iPhone.
+Una página para construir la búsqueda que vacía tu almacenamiento sin perder nada bueno, con un botón para copiarla. Se actualiza sola cada día con el meta de PvP y los mejores atacantes de incursión.
 
-La cadena deja fuera:
-- **Meta PvP:** familias completas (con preevoluciones) del top de PvPoke en la liga de 500 PC, la Super Ball, la Ultra Ball y la Master Ball.
-- **Atacantes de incursión:** las familias de los 10 mejores de cada tipo (incluidas megas), solo los ejemplares con 11–15 de ataque.
-- **Especiales:** variocolor, oscuros, legendarios, singulares, ultraentes, con disfraz o fondo, dinamax, gigamax, con ataques especiales, intercambiados y todo lo etiquetado.
-- **Los de 4 estrellas.**
+- **Página:** https://terri-lorca.github.io/papelera-pogo/
+- **Cadena para el atajo del iPhone:** https://raw.githubusercontent.com/Terri-Lorca/papelera-pogo/main/docs/cadena.txt
 
-Está pensada para el juego en español. Los datos salen de PvPoke y del game master del juego (PokeMiners), los dos en GitHub.
+## Qué protege
 
-## Ponerla en marcha (una vez, desde el ordenador)
+- **Meta PvP:** los Pokémon del top de PvPoke en la liga de 500 PC, la Super Ball, la Ultra Ball y la Master Ball que pueden llegar a un % de su mejor versión en esa liga (el mismo % que da Poke Genie). Por defecto, 95 %.
+- **Atacantes de incursión:** las familias de los mejores atacantes de cada tipo, megas incluidas, con 11 o más de ataque.
+- **Especiales:** variocolor, oscuros, legendarios, singulares, ultraentes, con disfraz o fondo, dinamax, gigamax, con ataques especiales, intercambiados (incluye los con suerte) y todo lo etiquetado.
+- **Siempre guardar:** especies que quieres conservar con cualquier IV.
+- **Límites:** solo entran Pokémon de las estrellas que elijas y, si quieres, hasta un PC máximo.
 
-1. Crea en GitHub un repositorio **público** vacío, por ejemplo `papelera-pogo`.
-2. Desde esta carpeta:
-   ```bash
-   git init && git add . && git commit -m "Papelera Pokémon GO"
-   git branch -M main
-   git remote add origin https://github.com/TU_USUARIO/papelera-pogo.git
-   git push -u origin main
-   ```
-3. En el repo, **Settings → Pages**: *Source* = **Deploy from a branch**, rama **main**, carpeta **/docs** → **Save**.
-   La página quedará en `https://TU_USUARIO.github.io/papelera-pogo/`.
-4. En **Actions → Papelera Pokémon GO → Run workflow** lánzala una vez para comprobar que va.
-   A partir de ahí se regenera sola todos los días hacia las 06:17 (hora de España en invierno).
+### Hasta dónde llega la precisión
 
-Si el paso *Publicar* falla con un error de permisos: **Settings → Actions → General → Workflow permissions → Read and write permissions**.
+El buscador del juego no ve los IV exactos, solo las barras de la valoración: 0, 1–5, 6–10, 11–14 y 15. Por eso:
 
-## Copiarla con un toque desde el iPhone
+- Nunca va a la papelera un Pokémon del meta que pueda llegar al % elegido. `comprobar.py` lo verifica antes de publicar.
+- Algunos que no llegan se guardan de más, porque comparten barras con otros que sí. La página te dice cuántos te quedas de cada 100.
+- El 95 % es bastante generoso: con él te quedas con unos 79 de cada 100 Pokémon de las familias meta. Con el 98 %, con unos 28.
 
-App **Atajos** → **+** → añade estas acciones:
-1. **Obtener contenido de URL** → `https://TU_USUARIO.github.io/papelera-pogo/cadena.txt`
-2. **Copiar al portapapeles**
-3. (Opcional) **Mostrar notificación** → "Cadena copiada"
+## Ajustes
 
-Ponle de nombre "Papelera PoGo" y añádelo a la pantalla de inicio. Lo tocas, abres el juego y pegas.
+En la página puedes cambiarlo todo. Los cambios se guardan en tu navegador.
 
-## Personalizar
-
-Edita `config.json` y haz commit. El cambio se aplica en la siguiente ejecución, o al momento con *Run workflow*.
+El atajo del iPhone usa `config.json`. Para que use tus ajustes de la página, pulsa **Copiar ajustes para config.json**, abre **Editar config.json** y pega.
 
 | Campo | Qué hace |
 |---|---|
-| `top_pvp` | Cuántos Pokémon del ranking de cada liga se protegen. |
-| `top_atacantes_por_tipo` | Cuántas familias de atacantes por tipo. |
-| `siempre_guardar` | Especies que quieres guardar siempre, con su nombre en PvPoke (inglés): `"skwovet"`, `"stunfisk_galarian"`… |
-| `estrellas_papelera` | `"0*,1*,2*,3*"` por defecto. Pon `"0*,1*,2*"` para ser más conservador. |
+| `estrellas_papelera` | Estrellas que pueden ir a la papelera, por ejemplo `[0, 1, 2, 3]`. |
+| `pc_maximo` | PC máximo. `null` para no poner límite. |
+| `pvp_minimo` | % mínimo para guardar un Pokémon del meta (de 90 a 99). |
+| `top_pvp` | Cuántos del ranking de cada liga cuentan como meta. `0` desactiva la liga. |
+| `top_atacantes_por_tipo` | Cuántos atacantes de cada tipo. `0` para no protegerlos. |
+| `ataque_minimo_atacantes` | `11` (11 a 15 de ataque) o `15`. |
+| `siempre_guardar` | Especies con su nombre en PvPoke, por ejemplo `"skwovet"`. |
+| `proteger` | Cada especial y extra: `listos_para_liga`, `nundos`, `tamanos`, `evolucionables`… |
 
-## Detalles
+## Cómo funciona
 
-- Antes de publicar, `comprobar.py` simula el buscador del juego con varios casos de prueba. Si algo falla (por ejemplo, porque cambia el formato de los datos), no se publica nada y la página se queda con la última cadena buena.
-- Los atacantes se ordenan con un estimador de DPS/TDO a nivel 40 con 15/15/15, contra un rival genérico débil a ese tipo.
-- Como la página cambia cada día, el workflow hace un commit diario. Eso evita que GitHub desactive la tarea programada por inactividad.
-- Los datos de incursiones dependen de cuándo actualice PokeMiners el game master. La fecha aparece en la página.
+Cada día, hacia las 06:17, GitHub Actions:
+1. Descarga los rankings y datos de PvPoke y el game master del juego (PokeMiners).
+2. `generar_papelera.py` calcula, para cada Pokémon del meta y cada liga, el % de producto de estadísticas de las 4096 combinaciones de IV, lo resume por barras y ordena los atacantes por tipo. Escribe `docs/datos.json` y la página.
+3. `node construir.js` arma la cadena de `config.json` con `web/papelera.js`, el mismo motor que usa la página.
+4. `comprobar.py` simula el buscador del juego. Si algo falla, no se publica y se queda la versión anterior.
+
+Para lanzarlo a mano: **Actions → Papelera Pokémon GO → Run workflow**.

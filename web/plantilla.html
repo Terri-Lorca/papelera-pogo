@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF1EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1719" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Papelera">
+<title>Papelera de Pokémon GO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light dark;
+  --paper: #EDF1EE; --surface: #FFFFFF; --ink: #15222C; --muted: #5B6B73; --line: #D6DEDA;
+  --teal: #0A7C6E; --teal-soft: #DCEFEA; --gold: #B98300; --coral: #C9502F; --violet: #6448C8; --blue: #2756C8;
+  --panel: #15222C; --panel-ink: #E9F0EC; --panel-muted: #8FA2A8;
+  --c-limites: #F2C14E; --c-especiales: #5FD4BF; --c-pvp: #8EB0FF; --c-atacantes: #FF9B7E; --c-siempre: #D6B8FF; --c-extra: #C9BBFF;
+  --radius: 16px;
+  --display: "Bricolage Grotesque", ui-rounded, system-ui, sans-serif;
+  --text: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0F1719; --surface: #172226; --ink: #E6EEEA; --muted: #93A5A9; --line: #263437;
+    --teal: #35C2AC; --teal-soft: #173A36; --gold: #F0BC3A; --coral: #F07D5F; --violet: #A08CFF; --blue: #7BA2FF;
+    --panel: #0A1113; --panel-ink: #E6EEEA; --panel-muted: #7F9196;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--text); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 18px 120px; }
+
+/* cabecera */
+header { margin: 8px 0 22px; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(44px, 12vw, 76px); line-height: .92; letter-spacing: -.035em; margin: 0; }
+.lead { color: var(--muted); max-width: 46ch; margin: 10px 0 0; }
+
+/* rejilla */
+.grid { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
+.side, .main { min-width: 0; }
+@media (min-width: 920px) {
+  .grid { grid-template-columns: minmax(0, 1fr) 420px; align-items: start; }
+  .side { position: sticky; top: 20px; order: 2; }
+  .main { order: 1; }
+}
+
+/* panel de la cadena */
+.cadena-panel { background: var(--panel); color: var(--panel-ink); border-radius: 22px; padding: 18px 18px 16px; }
+.cadena-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.cadena-top h2 { font-family: var(--display); font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.cuenta { color: var(--panel-muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tokens { margin: 12px 0 0; font: 13px/1.55 ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all; max-height: 9.3em; overflow: hidden; position: relative; transition: max-height .3s ease; }
+.tokens.abierta { max-height: none; }
+.tokens:not(.abierta)::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3.2em; background: linear-gradient(transparent, var(--panel)); }
+.tok-limites { color: var(--c-limites); } .tok-especiales { color: var(--c-especiales); } .tok-pvp { color: var(--c-pvp); }
+.tok-atacantes { color: var(--c-atacantes); } .tok-siempre { color: var(--c-siempre); } .tok-extra { color: var(--c-extra); }
+.amp { color: var(--panel-muted); }
+.ver { background: none; border: 0; color: var(--panel-ink); text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; font-size: 14px; cursor: pointer; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--panel-muted); }
+.leyenda li::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--dot); vertical-align: 1px; }
+.resumen { margin: 14px 0 0; font-size: 15px; color: var(--panel-ink); }
+.resumen strong { color: #fff; font-weight: 650; }
+@media (prefers-color-scheme: dark) { .resumen strong { color: var(--panel-ink); } }
+.error { color: #FFB4A1; font-weight: 600; }
+
+/* botón copiar */
+.copiar { width: 100%; margin-top: 16px; border: 0; border-radius: 14px; padding: 17px 18px; background: var(--teal); color: #fff; font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -.01em; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: transform .15s ease, background .2s ease; }
+@media (prefers-color-scheme: dark) { .copiar { color: #072521; } }
+.copiar:active { transform: scale(.98); }
+.copiar.hecho { background: var(--gold); color: #1E1600; }
+.copiar:disabled { opacity: .45; cursor: not-allowed; }
+.barra { position: fixed; inset: auto 0 0 0; padding: 10px 16px max(12px, env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); z-index: 5; }
+.barra .copiar { margin: 0; max-width: 680px; margin-inline: auto; }
+@media (min-width: 920px) { .barra { display: none; } }
+@media (max-width: 919px) { .side .copiar { display: none; } }
+
+/* preajustes */
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--surface); border: 1px solid var(--line); padding: 5px; border-radius: 14px; }
+.presets button { border: 0; background: none; padding: 10px 6px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.presets button[aria-pressed="true"] { background: var(--teal); color: #fff; }
+@media (prefers-color-scheme: dark) { .presets button[aria-pressed="true"] { color: #072521; } }
+.presets-nota { color: var(--muted); font-size: 14px; margin: 8px 2px 0; }
+
+/* grupos de ajustes */
+section.grupo { margin-top: 26px; }
+section.grupo > h2 { font-family: var(--display); font-weight: 700; font-size: 23px; letter-spacing: -.015em; margin: 0 2px 4px; }
+section.grupo > p.ayuda { color: var(--muted); margin: 0 2px 10px; font-size: 15px; max-width: 60ch; }
+.lista { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.fila { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 16px; min-height: 56px; }
+.fila + .fila { border-top: 1px solid var(--line); }
+.fila .txt { min-width: 0; }
+.fila .txt b { display: block; font-weight: 600; }
+.fila .txt small { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.35; margin-top: 1px; }
+.fila.col { flex-direction: column; align-items: stretch; }
+
+/* controles */
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { border: 1.5px solid var(--line); background: var(--surface); padding: 8px 13px; border-radius: 999px; font-weight: 600; cursor: pointer; font-variant-numeric: tabular-nums; }
+.pill[aria-pressed="true"] { border-color: var(--teal); background: var(--teal-soft); color: var(--teal); }
+.estrella { color: var(--gold); }
+.switch { position: relative; width: 51px; height: 31px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch span { position: absolute; inset: 0; background: var(--line); border-radius: 999px; transition: background .2s; pointer-events: none; }
+.switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+.switch input:checked + span { background: var(--teal); }
+.switch input:checked + span::after { transform: translateX(20px); }
+.switch input:focus-visible + span { outline: 3px solid var(--teal); outline-offset: 2px; }
+.stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; flex: none; }
+.stepper button { width: 40px; height: 38px; border: 0; background: none; font-size: 20px; cursor: pointer; }
+.stepper output { min-width: 62px; text-align: center; font-weight: 650; font-variant-numeric: tabular-nums; font-size: 15px; }
+.slider { display: flex; align-items: center; gap: 14px; }
+.slider input { flex: 1; accent-color: var(--teal); height: 30px; }
+.slider output { font-family: var(--display); font-weight: 800; font-size: 30px; min-width: 76px; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.nota { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.campo { display: flex; gap: 8px; }
+.campo input { flex: 1; min-width: 0; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper); }
+.boton { border: 1.5px solid var(--teal); color: var(--teal); background: none; padding: 10px 15px; border-radius: 12px; font-weight: 650; cursor: pointer; white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--teal-soft); color: var(--teal); padding: 6px 6px 6px 12px; border-radius: 999px; font-weight: 600; }
+.chip button { border: 0; background: none; color: inherit; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; }
+.vacio { color: var(--muted); font-size: 14px; }
+
+/* otras búsquedas */
+.busq .fila { align-items: center; }
+.busq code { display: block; font: 12.5px/1.4 ui-monospace, "SF Mono", Menlo, monospace; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-top: 2px; }
+.mini { border: 0; background: var(--teal-soft); color: var(--teal); font-weight: 650; padding: 9px 14px; border-radius: 10px; cursor: pointer; flex: none; }
+.mini.hecho { background: var(--gold); color: #1E1600; }
+
+/* listas protegidas */
+details.bloque { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 16px; }
+details.bloque + details.bloque { margin-top: 10px; }
+details.bloque summary { cursor: pointer; padding: 15px 0; font-weight: 650; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+details.bloque summary::-webkit-details-marker { display: none; }
+details.bloque summary::after { content: "+"; font-size: 20px; line-height: 1; color: var(--muted); }
+details.bloque[open] summary::after { content: "−"; }
+.liga h3, .tipo h3 { font-size: 15px; margin: 12px 0 6px; }
+ol.rank { margin: 0 0 14px; padding: 0; list-style: none; columns: 2 170px; column-gap: 18px; font-size: 14px; }
+ol.rank li { display: flex; gap: 8px; break-inside: avoid; padding: 2px 0; }
+ol.rank li span { color: var(--muted); min-width: 2.2em; text-align: right; font-variant-numeric: tabular-nums; }
+.tipo { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.tipo:first-of-type { border-top: 0; }
+.tipo b { display: flex; align-items: center; gap: 7px; }
+.tipo b::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--tc); flex: none; }
+
+footer { margin-top: 34px; color: var(--muted); font-size: 14px; }
+footer a { color: var(--teal); }
+footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.aviso { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 12px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 10; }
+.aviso.ver { opacity: 1; transform: translate(-50%, 0); }
+@media (min-width: 920px) { .aviso { bottom: 28px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Papelera</h1>
+    <p class="lead">Tu búsqueda para vaciar el almacenamiento de Pokémon GO sin perder nada bueno. Se actualiza sola cada día con el meta y los mejores atacantes.</p>
+  </header>
+
+  <div class="grid">
+    <aside class="side">
+      <div class="cadena-panel" id="panel">
+        <div class="cadena-top">
+          <h2>Tu cadena</h2>
+          <span class="cuenta" id="cuenta"></span>
+        </div>
+        <div class="tokens" id="tokens" aria-live="polite"></div>
+        <button class="ver" id="ver" type="button">Ver la cadena entera</button>
+        <ul class="leyenda">
+          <li style="--dot: var(--c-limites)">Estrellas y PC</li>
+          <li style="--dot: var(--c-especiales)">Especiales</li>
+          <li style="--dot: var(--c-pvp)">Meta PvP</li>
+          <li style="--dot: var(--c-atacantes)">Atacantes</li>
+          <li style="--dot: var(--c-siempre)">Siempre guardar</li>
+        </ul>
+        <p class="resumen" id="resumen"></p>
+        <button class="copiar" data-copiar type="button">Copiar cadena</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="presets" role="group" aria-label="Preajustes">
+        <button type="button" data-preset="prudente" aria-pressed="false">Prudente</button>
+        <button type="button" data-preset="normal" aria-pressed="false">Normal</button>
+        <button type="button" data-preset="fondo" aria-pressed="false">A fondo</button>
+      </div>
+      <p class="presets-nota" id="presets-nota"></p>
+
+      <section class="grupo">
+        <h2>Qué puede ir a la papelera</h2>
+        <div class="lista">
+          <div class="fila col">
+            <div class="txt"><b>Estrellas</b><small>Los de 4 estrellas nunca se tocan.</small></div>
+            <div class="pills" id="estrellas"></div>
+          </div>
+          <div class="fila col">
+            <div class="txt"><b>PC máximo</b><small>Lo que pase de aquí se queda.</small></div>
+            <div class="pills" id="pc"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2>PvP</h2>
+        <p class="ayuda">Se guardan los Pokémon del meta que pueden llegar a este % de su mejor versión en su liga, como el % de Poke Genie.</p>
+        <div class="lista">
+          <div class="fila col">
+            <div class="slider">
+              <input type="range" id="pvpmin" min="90" max="99" step="1" aria-label="Porcentaje mínimo en PvP">
+              <output id="pvpmin-out"></output>
+            </div>
+            <p class="nota" id="pvpmin-nota"></p>
+          </div>
+          <div id="ligas"></div>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2>Incursiones</h2>
+        <p class="ayuda">Los mejores atacantes de cada tipo, megas incluidas. Se guardan los que tienen buen ataque, que es lo que cuenta en incursiones.</p>
+        <div class="lista">
+          <div class="fila">
+            <div class="txt"><b>Atacantes por tipo</b><small>Los mejores de cada uno de los 18 tipos.</small></div>
+            <div class="stepper" data-step="atacantes"><button type="button" aria-label="Menos">−</button><output></output><button type="button" aria-label="Más">+</button></div>
+          </div>
+          <div class="fila col">
+            <div class="txt"><b>Ataque mínimo para guardarlos</b></div>
+            <div class="pills" id="ataque"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grupo">
+        <h2>Proteger también</h2>
+        <div class="lista" id="extras"></div>
+      </section>
+
+      <section class="grupo">
+        <h2>Siempre guardar</h2>
+        <p class="ayuda">Especies que quieres conservar con cualquier IV, con toda su familia. Escribe el nombre en inglés o el número de la Pokédex.</p>
+        <div class="lista"><div class="fila col">
+          <form class="campo" id="form-siempre" autocomplete="off">
+            <input id="input-siempre" list="lista-especies" placeholder="Por ejemplo, Skwovet o 819" aria-label="Especie para guardar siempre">
+            <button class="boton" type="submit">Añadir</button>
+          </form>
+          <datalist id="lista-especies"></datalist>
+          <div class="chips" id="chips-siempre"></div>
+        </div></div>
+      </section>
+
+      <section class="grupo">
+        <h2>Especiales</h2>
+        <p class="ayuda">Están todos protegidos. Desactiva alguno solo si sabes que quieres limpiarlo.</p>
+        <details class="bloque"><summary>Ver los 12 tipos de especiales</summary><div id="especiales" style="margin: 0 -16px"></div></details>
+      </section>
+
+      <section class="grupo">
+        <h2>Otras búsquedas</h2>
+        <p class="ayuda">Para revisar, subir o evolucionar. Se adaptan a tus ajustes.</p>
+        <div class="lista busq" id="busquedas"></div>
+      </section>
+
+      <section class="grupo">
+        <h2>Qué se protege ahora</h2>
+        <details class="bloque"><summary id="sum-meta">Meta PvP</summary><div id="meta"></div></details>
+        <details class="bloque"><summary id="sum-atk">Atacantes por tipo</summary><div id="atk"></div></details>
+      </section>
+
+      <footer>
+        <p id="fechas"></p>
+        <p>El atajo del iPhone copia la cadena con los ajustes de <code>config.json</code>. Para que use los de esta página, copia los ajustes y pégalos en ese archivo.</p>
+        <div class="acciones">
+          <button class="boton" type="button" id="copiar-config">Copiar ajustes para config.json</button>
+          <a class="boton" href="https://github.com/Terri-Lorca/papelera-pogo/edit/main/config.json">Editar config.json</a>
+          <a class="boton" href="https://github.com/Terri-Lorca/papelera-pogo/actions/workflows/papelera.yml">Actualizar ahora</a>
+          <button class="boton" type="button" id="restablecer">Restablecer</button>
+        </div>
+        <p>Datos de <a href="https://pvpoke.com">PvPoke</a> y del juego (PokeMiners). El buscador solo ve las barras de la valoración, no los IV exactos, así que algunos Pokémon que no llegan al % se guardan por si acaso. Nunca al revés.</p>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<div class="barra"><button class="copiar" data-copiar type="button">Copiar cadena</button></div>
+<div class="aviso" id="aviso" role="status"></div>
+
+<script>/*__PAPELERA_JS__*/</script>
+<script>
+(function () {
+  'use strict';
+  const DATOS = "__DATOS__";
+  const P = window.Papelera;
+  const CLAVE = 'papelera.ajustes.v2';
+  const $ = (s, el = document) => el.querySelector(s);
+  const num = (n) => n.toLocaleString('es-ES');
+  const base = P.normalizar(DATOS.config, DATOS.config);
+  const clonar = (o) => JSON.parse(JSON.stringify(o));
+
+  const PRESETS = {
+    normal: () => clonar(base),
+    prudente: () => Object.assign(clonar(base), {
+      estrellas_papelera: [0, 1, 2], pc_maximo: 1500, pvp_minimo: 93,
+      top_pvp: { liga_500: 100, super_ball: 100, ultra_ball: 100, master_ball: 50 },
+      top_atacantes_por_tipo: 15, ataque_minimo_atacantes: 11,
+      proteger: Object.assign(clonar(base.proteger), { listos_para_liga: true, nundos: true, tamanos: true }),
+    }),
+    fondo: () => Object.assign(clonar(base), {
+      estrellas_papelera: [0, 1, 2, 3], pc_maximo: null, pvp_minimo: 98,
+      top_pvp: { liga_500: 25, super_ball: 25, ultra_ball: 25, master_ball: 15 },
+      top_atacantes_por_tipo: 6, ataque_minimo_atacantes: 15,
+      proteger: Object.assign(clonar(base.proteger), { listos_para_liga: false, nundos: false, tamanos: false, evolucionables: false }),
+    }),
+  };
+  const NOTA_PRESET = {
+    normal: 'Tus ajustes de config.json: lo que copia el atajo.',
+    prudente: 'Guarda más: hasta 2 estrellas y 1.500 PC, más meta y más atacantes.',
+    fondo: 'Libera más espacio: solo el meta de verdad (98 %) y atacantes con 15 de ataque.',
+  };
+
+  let cfg;
+  try { cfg = P.normalizar(JSON.parse(localStorage.getItem(CLAVE)), base); } catch (_) { cfg = null; }
+  if (!cfg || !cfg.top_pvp) cfg = clonar(base);
+  let ultimo = null;
+
+  function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(cfg)); } catch (_) {} }
+  function igual(a, b) { return JSON.stringify(P.normalizar(a, base)) === JSON.stringify(P.normalizar(b, base)); }
+
+  // ---------- copiar ----------
+  function aviso(t) {
+    const a = $('#aviso'); a.textContent = t; a.classList.add('ver');
+    clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('ver'), 1800);
+  }
+  async function copiarTexto(texto) {
+    try { await navigator.clipboard.writeText(texto); return true; } catch (_) {
+      const t = document.createElement('textarea'); t.value = texto; t.setAttribute('readonly', '');
+      t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select();
+      t.setSelectionRange(0, texto.length);
+      let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+      t.remove(); return ok;
+    }
+  }
+  function marcarHecho(btn, texto, original) {
+    btn.classList.add('hecho'); btn.textContent = texto;
+    setTimeout(() => { btn.classList.remove('hecho'); btn.textContent = original; }, 1600);
+  }
+  document.querySelectorAll('[data-copiar]').forEach((b) => b.addEventListener('click', async () => {
+    if (!ultimo || !ultimo.cadena) return;
+    const ok = await copiarTexto(ultimo.cadena);
+    if (ok) { document.querySelectorAll('[data-copiar]').forEach((x) => marcarHecho(x, 'Cadena copiada', 'Copiar cadena')); aviso('Pégala en el buscador del juego'); }
+    else aviso('No se pudo copiar. Abre "Ver la cadena entera" y cópiala a mano.');
+  }));
+
+  // ---------- controles ----------
+  function pill(texto, activo, onClick, extra) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pill'; b.setAttribute('aria-pressed', String(!!activo));
+    b.innerHTML = texto; if (extra) b.setAttribute('aria-label', extra);
+    b.addEventListener('click', onClick); return b;
+  }
+  function filaSwitch(cont, titulo, detalle, valor, onChange) {
+    const f = document.createElement('label'); f.className = 'fila';
+    f.innerHTML = `<span class="txt"><b></b>${detalle ? '<small></small>' : ''}</span><span class="switch"><input type="checkbox"><span></span></span>`;
+    f.querySelector('b').textContent = titulo; if (detalle) f.querySelector('small').textContent = detalle;
+    const i = f.querySelector('input'); i.checked = !!valor; i.addEventListener('change', () => onChange(i.checked));
+    cont.appendChild(f);
+  }
+  function stepper(el, valor, min, max, paso, fmt, onChange) {
+    const [menos, out, mas] = [el.children[0], el.children[1], el.children[2]];
+    out.textContent = fmt(valor);
+    menos.disabled = valor <= min; mas.disabled = valor >= max;
+    menos.onclick = () => onChange(Math.max(min, valor - paso));
+    mas.onclick = () => onChange(Math.min(max, valor + paso));
+  }
+  function cambiar(fn) { fn(); guardar(); pintar(); }
+
+  const EXTRAS = [
+    ['listos_para_liga', 'Listos para Super y Ultra Ball', 'Entre 1.400 y 1.500 PC, y entre 2.300 y 2.500 PC.'],
+    ['nundos', 'Nundos', 'Los de 0/0/0, por si los coleccionas.'],
+    ['tamanos', 'Tamaños XXL y XXS', 'Para exhibiciones y medallas.'],
+    ['evolucionables', 'Los que puedes evolucionar ya', 'Para evolucionarlos con un Huevo Suerte.'],
+  ];
+  const ESPECIALES = [
+    ['variocolor', 'Variocolor'], ['oscuro', 'Oscuros'], ['legendario', 'Legendarios'], ['singular', 'Singulares'],
+    ['ultraentes', 'Ultraentes'], ['disfraz', 'Con disfraz'], ['fondo', 'Con fondo especial'], ['dinamax', 'Dinamax'],
+    ['gigamax', 'Gigamax'], ['especial', 'Con ataques especiales'], ['intercambiados', 'Intercambiados', 'Incluye todos los Pokémon con suerte.'],
+    ['etiquetados', 'Con etiqueta', 'Etiqueta lo que quieras guardar y no saldrá nunca.'],
+  ];
+  const COLORES_TIPO = { normal: '#9FA19F', fire: '#E62829', water: '#2980EF', grass: '#3FA129', electric: '#FAC000', ice: '#3DCEF3', fighting: '#FF8000', poison: '#9141CB', ground: '#915121', flying: '#81B9EF', psychic: '#EF4179', bug: '#91A119', rock: '#AFA981', ghost: '#704170', dragon: '#5060E1', dark: '#624D4E', steel: '#60A1B8', fairy: '#EF70EF' };
+  const PCS = [null, 1500, 2000, 2500, 3000];
+  const especiesPorId = new Map(DATOS.especies.map((e) => [e[0], e]));
+
+  function pintarControles() {
+    const est = $('#estrellas'); est.innerHTML = '';
+    for (let n = 0; n <= 3; n++) {
+      const on = cfg.estrellas_papelera.includes(n);
+      est.appendChild(pill(`${n} <span class="estrella">★</span>`, on, () => cambiar(() => {
+        const s = new Set(cfg.estrellas_papelera); on ? s.delete(n) : s.add(n);
+        cfg.estrellas_papelera = Array.from(s).sort();
+      }), `${n} estrellas`));
+    }
+    const pc = $('#pc'); pc.innerHTML = '';
+    const lista = PCS.includes(cfg.pc_maximo) ? PCS : PCS.concat([cfg.pc_maximo]).sort((a, b) => (a || 0) - (b || 0));
+    for (const v of lista) pc.appendChild(pill(v ? num(v) : 'Sin límite', cfg.pc_maximo === v, () => cambiar(() => { cfg.pc_maximo = v; })));
+
+    $('#pvpmin').value = cfg.pvp_minimo; $('#pvpmin-out').textContent = cfg.pvp_minimo + ' %';
+    const ligas = $('#ligas'); ligas.innerHTML = '';
+    for (const l of DATOS.ligas) {
+      const f = document.createElement('div'); f.className = 'fila';
+      f.innerHTML = `<div class="txt"><b></b><small></small></div><div class="stepper"><button type="button" aria-label="Menos">−</button><output></output><button type="button" aria-label="Más">+</button></div>`;
+      f.querySelector('b').textContent = l.nombre;
+      const v = cfg.top_pvp[l.id] || 0;
+      f.querySelector('small').textContent = v ? `Los ${v} primeros del ranking de PvPoke.` : 'No se protege.';
+      stepper(f.querySelector('.stepper'), v, 0, 100, 10, (x) => (x ? 'Top ' + x : 'No'), (x) => cambiar(() => { cfg.top_pvp[l.id] = x; }));
+      ligas.appendChild(f);
+    }
+    stepper($('[data-step="atacantes"]'), cfg.top_atacantes_por_tipo, 0, 15, 1, (x) => (x ? 'Top ' + x : 'No'), (x) => cambiar(() => { cfg.top_atacantes_por_tipo = x; }));
+    const at = $('#ataque'); at.innerHTML = '';
+    at.appendChild(pill('11 a 15', cfg.ataque_minimo_atacantes === 11, () => cambiar(() => { cfg.ataque_minimo_atacantes = 11; })));
+    at.appendChild(pill('Solo 15', cfg.ataque_minimo_atacantes === 15, () => cambiar(() => { cfg.ataque_minimo_atacantes = 15; })));
+
+    const ex = $('#extras'); ex.innerHTML = '';
+    for (const [k, t, d] of EXTRAS) filaSwitch(ex, t, d, cfg.proteger[k], (v) => cambiar(() => { cfg.proteger[k] = v; }));
+    const es = $('#especiales'); es.innerHTML = '';
+    for (const [k, t, d] of ESPECIALES) filaSwitch(es, t, d, cfg.proteger[k] !== false, (v) => cambiar(() => { cfg.proteger[k] = v; }));
+
+    const chips = $('#chips-siempre'); chips.innerHTML = '';
+    if (!cfg.siempre_guardar.length) chips.innerHTML = '<span class="vacio">Ninguna todavía.</span>';
+    for (const id of cfg.siempre_guardar) {
+      const e = especiesPorId.get(id); if (!e) continue;
+      const c = document.createElement('span'); c.className = 'chip';
+      c.innerHTML = '<span></span><button type="button">×</button>';
+      c.firstChild.textContent = e[1];
+      c.lastChild.setAttribute('aria-label', 'Quitar ' + e[1]);
+      c.lastChild.onclick = () => cambiar(() => { cfg.siempre_guardar = cfg.siempre_guardar.filter((x) => x !== id); });
+      chips.appendChild(c);
+    }
+
+    document.querySelectorAll('[data-preset]').forEach((b) => {
+      const on = igual(cfg, PRESETS[b.dataset.preset]());
+      b.setAttribute('aria-pressed', String(on));
+    });
+    const activo = Object.keys(PRESETS).find((k) => igual(cfg, PRESETS[k]()));
+    $('#presets-nota').textContent = activo ? NOTA_PRESET[activo] : 'Ajustes personalizados. Se guardan en este navegador.';
+  }
+
+  $('#pvpmin').addEventListener('input', (e) => { cfg.pvp_minimo = Number(e.target.value); $('#pvpmin-out').textContent = cfg.pvp_minimo + ' %'; programar(); });
+  $('#pvpmin').addEventListener('change', () => { guardar(); pintar(); });
+  let tPintar;
+  function programar() { clearTimeout(tPintar); tPintar = setTimeout(() => { guardar(); pintarCadena(); }, 120); }
+
+  document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => cambiar(() => { cfg = PRESETS[b.dataset.preset](); })));
+  $('#form-siempre').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const q = $('#input-siempre').value.trim().toLowerCase();
+    if (!q) return;
+    const n = Number(q);
+    const e = DATOS.especies.find((x) => (n ? x[2] === n : x[1].toLowerCase() === q || x[0] === q))
+      || DATOS.especies.find((x) => !n && x[1].toLowerCase().startsWith(q));
+    if (!e) { aviso('No encuentro esa especie. Prueba con el nombre en inglés.'); return; }
+    $('#input-siempre').value = '';
+    if (!cfg.siempre_guardar.includes(e[0])) cambiar(() => { cfg.siempre_guardar.push(e[0]); });
+    aviso(e[1] + ' y su familia se guardan siempre');
+  });
+  $('#ver').addEventListener('click', () => {
+    const t = $('#tokens'); const abierta = t.classList.toggle('abierta');
+    $('#ver').textContent = abierta ? 'Ver menos' : 'Ver la cadena entera';
+  });
+  $('#restablecer').addEventListener('click', () => cambiar(() => { cfg = clonar(base); }));
+  $('#copiar-config').addEventListener('click', async (ev) => {
+    const out = P.normalizar(cfg, base);
+    const ok = await copiarTexto(JSON.stringify(out, null, 2) + '\n');
+    if (ok) marcarHecho(ev.currentTarget, 'Ajustes copiados', 'Copiar ajustes para config.json');
+  });
+
+  // ---------- cadena y resumen ----------
+  function pintarCadena() {
+    ultimo = P.construir(DATOS, cfg);
+    const tk = $('#tokens'); tk.innerHTML = '';
+    document.querySelectorAll('[data-copiar]').forEach((b) => { b.disabled = !ultimo.cadena; });
+    if (!ultimo.cadena) { tk.innerHTML = `<span class="error">${ultimo.error}</span>`; $('#cuenta').textContent = ''; $('#resumen').textContent = ''; return; }
+    ultimo.partes.forEach((p, i) => {
+      if (i) { const a = document.createElement('span'); a.className = 'amp'; a.textContent = '&'; tk.appendChild(a); }
+      const s = document.createElement('span'); s.className = 'tok-' + p.tipo; s.textContent = p.s; tk.appendChild(s);
+    });
+    const r = ultimo.resumen;
+    $('#cuenta').textContent = num(r.longitud) + ' caracteres';
+    const est = cfg.estrellas_papelera;
+    const rangoEst = est.length > 1 && est[est.length - 1] - est[0] === est.length - 1 ? `de ${est[0]} a ${est[est.length - 1]} estrellas` : est.length === 1 ? `de ${est[0]} estrellas` : `de ${est.join(', ')} estrellas`;
+    const partes = [`Saldrán Pokémon <strong>${rangoEst}</strong>${cfg.pc_maximo ? ` y hasta <strong>${num(cfg.pc_maximo)} PC</strong>` : ''}.`];
+    const salva = [];
+    if (r.familias_pvp) salva.push(`los del meta PvP que pueden llegar al <strong>${cfg.pvp_minimo} %</strong> (${r.familias_pvp} familias)`);
+    if (r.familias_atacantes) salva.push(`los atacantes con <strong>${cfg.ataque_minimo_atacantes === 15 ? '15' : '11 o más'}</strong> de ataque (${r.familias_atacantes} familias)`);
+    if (r.familias_siempre) salva.push(`${r.familias_siempre === 1 ? 'la familia' : 'las ' + r.familias_siempre + ' familias'} de "siempre guardar"`);
+    partes.push(`Se salvan los especiales, lo etiquetado${salva.length ? ', ' + salva.join(', ').replace(/, ([^,]*)$/, ' y $1') : ''}.`);
+    $('#resumen').innerHTML = partes.join(' ');
+    $('#pvpmin-nota').textContent = r.familias_pvp
+      ? `Con el ${cfg.pvp_minimo} % te quedas con ${Math.round(r.guardado_pvp * 100)} de cada 100 Pokémon de esas familias. Cuanto más alto, más espacio liberas.`
+      : 'Activa al menos una liga para proteger el meta.';
+    pintarBusquedas();
+  }
+
+  function pintarBusquedas() {
+    const meta = P.dexMeta(DATOS, cfg), atk = P.dexAtacantes(DATOS, cfg);
+    const lista = [
+      ['Meta PvP sin etiquetar', 'Para revisarlos con Poke Genie y etiquetar los buenos.', meta ? meta + '&!#' : ''],
+      ['Atacantes con buen ataque', 'Candidatos a subir para incursiones.', atk ? atk + '&3-4ataque&!#' : ''],
+      ['Los 100 %', 'Tus Pokémon perfectos.', '4*'],
+      ['Nundos', 'Los de 0/0/0.', '0ataque&0defensa&0PS'],
+      ['Listos para Super Ball', 'Entre 1.400 y 1.500 PC.', 'pc1400-1500'],
+      ['Listos para Ultra Ball', 'Entre 2.300 y 2.500 PC.', 'pc2300-2500'],
+      ['Pueden evolucionar ya', 'Para una sesión de Huevo Suerte.', 'evolucionar'],
+      ['XXL y XXS', 'Para exhibiciones.', 'xxl,xxs'],
+    ];
+    const cont = $('#busquedas'); cont.innerHTML = '';
+    for (const [t, d, s] of lista) {
+      if (!s) continue;
+      const f = document.createElement('div'); f.className = 'fila';
+      f.innerHTML = '<div class="txt"><b></b><small></small><code></code></div><button type="button" class="mini">Copiar</button>';
+      f.querySelector('b').textContent = t; f.querySelector('small').textContent = d; f.querySelector('code').textContent = s;
+      f.querySelector('button').addEventListener('click', async (ev) => {
+        const b = ev.currentTarget;
+        if (await copiarTexto(s)) { marcarHecho(b, 'Copiada', 'Copiar'); aviso(t + ': copiada'); }
+      });
+      cont.appendChild(f);
+    }
+  }
+
+  function pintarListas() {
+    const meta = $('#meta'); meta.innerHTML = '';
+    let total = 0;
+    for (const l of DATOS.ligas) {
+      const top = cfg.top_pvp[l.id] || 0;
+      const items = l.ranking.filter((e) => e.r <= top);
+      if (!items.length) continue;
+      total += items.length;
+      const d = document.createElement('div'); d.className = 'liga';
+      d.innerHTML = '<h3></h3><ol class="rank"></ol>';
+      d.querySelector('h3').textContent = `${l.nombre}, top ${top}`;
+      const ol = d.querySelector('ol');
+      for (const e of items) {
+        const li = document.createElement('li');
+        li.innerHTML = '<span></span><b></b>';
+        li.firstChild.textContent = e.r; li.lastChild.textContent = e.n.join(', '); li.lastChild.style.fontWeight = '500';
+        ol.appendChild(li);
+      }
+      meta.appendChild(d);
+    }
+    $('#sum-meta').textContent = total ? `Meta PvP (${total} especies)` : 'Meta PvP (ninguna liga activa)';
+    const atk = $('#atk'); atk.innerHTML = '';
+    const n = cfg.top_atacantes_por_tipo;
+    for (const t of DATOS.tipos) {
+      if (!n) break;
+      const d = document.createElement('div'); d.className = 'tipo'; d.style.setProperty('--tc', COLORES_TIPO[t.id] || '#999');
+      d.innerHTML = '<b></b><span></span>';
+      d.firstChild.textContent = t.nombre; d.lastChild.textContent = t.top.slice(0, n).map((a) => a.n).join(', ');
+      atk.appendChild(d);
+    }
+    $('#sum-atk').textContent = n ? `Atacantes por tipo (top ${n})` : 'Atacantes por tipo (desactivado)';
+  }
+
+  function pintar() { pintarControles(); pintarCadena(); pintarListas(); }
+
+  // datalist de especies
+  const dl = $('#lista-especies');
+  for (const e of DATOS.especies) { const o = document.createElement('option'); o.value = e[1]; dl.appendChild(o); }
+  const f = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  $('#fechas').textContent = `Actualizada el ${f(DATOS.generada)} a las ${new Date(DATOS.generada).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}.` +
+    (DATOS.datos_juego ? ` Datos de incursiones del ${f(DATOS.datos_juego)}.` : '');
+  pintar();
+})();
+</script>
+</body>
+</html>
