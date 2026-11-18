@@ -3,277 +3,385 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#EDF1EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1719" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#9BE7D8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1C2A" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Papelera">
 <title>Papelera de Pokémon GO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icono-180.png">
+<link rel="preload" href="fuentes/fredoka.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Fredoka y Nunito, licencia SIL Open Font License (fuentes/LICENSE-*.txt) */
+@font-face { font-family: "Fredoka"; font-style: normal; font-display: swap; font-weight: 300 700; src: url(fuentes/fredoka.woff2) format("woff2"); }
+@font-face { font-family: "Nunito"; font-style: normal; font-display: swap; font-weight: 200 1000; src: url(fuentes/nunito.woff2) format("woff2"); }
 :root {
   color-scheme: light dark;
-  --paper: #EDF1EE; --surface: #FFFFFF; --ink: #15222C; --muted: #5B6B73; --line: #D6DEDA;
-  --teal: #0A7C6E; --teal-soft: #DCEFEA; --gold: #B98300; --coral: #C9502F; --violet: #6448C8; --blue: #2756C8;
-  --panel: #15222C; --panel-ink: #E9F0EC; --panel-muted: #8FA2A8;
-  --c-limites: #F2C14E; --c-especiales: #5FD4BF; --c-pvp: #8EB0FF; --c-atacantes: #FF9B7E; --c-siempre: #D6B8FF; --c-extra: #C9BBFF;
-  --radius: 16px;
-  --display: "Bricolage Grotesque", ui-rounded, system-ui, sans-serif;
-  --text: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --fg: #1B2A3A; --ink: #1B2A3A; --ink-soft: #33475B; --muted: #4D6070; --paper: #F2FBF7; --card: #FFFFFF; --well: #EEF6F3;
+  --sky-a: #8EE3D3; --sky-b: #BDEBFF; --sky-c: #F2FBF7;
+  --teal: #0B8F79; --teal-hi: #13B89B; --teal-tint: #D3F5EC;
+  --gold: #FFC83D; --gold-d: #9A6F00; --orange: #E8602C; --orange-tint: #FFE4D8; --blue: #3D6CF0; --blue-tint: #E0E8FF;
+  --purple: #7C4DEB; --purple-tint: #EDE5FF; --pink: #E0408A; --pink-tint: #FFE1EE;
+  --screen: #12202D; --screen-ink: #E8F3F0; --screen-muted: #8DA3B3;
+  --t-limites: #FFD15C; --t-especiales: #6FE3CB; --t-pvp: #9BB6FF; --t-atacantes: #FFA27C; --t-siempre: #FF9CC8; --t-extra: #CDB8FF;
+  --div: color-mix(in srgb, var(--ink) 22%, transparent);
+  --line: 3px solid var(--ink); --drop: 0 5px 0 var(--ink); --drop-sm: 0 3px 0 var(--ink);
+  --r-lg: 24px; --r-md: 16px; --r-sm: 12px;
+  --display: "Fredoka", ui-rounded, "Arial Rounded MT Bold", system-ui, sans-serif;
+  --text: "Nunito", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --boing: cubic-bezier(.34, 1.56, .64, 1);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0F1719; --surface: #172226; --ink: #E6EEEA; --muted: #93A5A9; --line: #263437;
-    --teal: #35C2AC; --teal-soft: #173A36; --gold: #F0BC3A; --coral: #F07D5F; --violet: #A08CFF; --blue: #7BA2FF;
-    --panel: #0A1113; --panel-ink: #E6EEEA; --panel-muted: #7F9196;
+    --fg: #EAF6F2; --ink: #04090E; --ink-soft: #C9DAE6; --muted: #9DB3C2; --paper: #0B1C2A; --card: #13293A; --well: #0F2231;
+    --sky-a: #0E3F4E; --sky-b: #1B1F4A; --sky-c: #0B1C2A;
+    --teal: #0E9C84; --teal-hi: #19C3A5; --teal-tint: #12403C;
+    --orange-tint: #47281D; --blue-tint: #1E2B55; --purple-tint: #2E2452; --pink-tint: #4A1F33;
+    --screen: #07121B; --div: rgba(255, 255, 255, .13);
   }
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 var(--text); }
-button, input, select { font: inherit; color: inherit; }
-:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; border-radius: 6px; }
-.wrap { max-width: 1080px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 18px 120px; }
+body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--fg); font: 600 16px/1.5 var(--text); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 10px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* cabecera */
-header { margin: 8px 0 22px; }
-h1 { font-family: var(--display); font-weight: 800; font-size: clamp(44px, 12vw, 76px); line-height: .92; letter-spacing: -.035em; margin: 0; }
-.lead { color: var(--muted); max-width: 46ch; margin: 10px 0 0; }
+/* ---------- cielo ---------- */
+.cielo { position: absolute; inset: 0 0 auto 0; height: 560px; overflow: hidden; pointer-events: none;
+  background: linear-gradient(180deg, var(--sky-a) 0%, var(--sky-b) 55%, var(--sky-c) 100%); }
+@media (prefers-color-scheme: dark) {
+  .cielo::before { content: ""; position: absolute; inset: 0; opacity: .55;
+    background-image: radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 32% 8%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 58% 22%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 77% 12%, #fff 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 90% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 44% 36%, #fff 50%, transparent 51%); }
+}
+.orbe { position: absolute; border-radius: 50%; border: 3px solid rgba(27,42,58,.85);
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.9) 0 9%, rgba(255,255,255,0) 10%), radial-gradient(circle at 50% 60%, var(--c), color-mix(in srgb, var(--c) 70%, #000) 100%);
+  box-shadow: 0 6px 0 rgba(27,42,58,.85); animation: flota var(--d, 14s) ease-in-out infinite alternate; }
+@keyframes flota { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(var(--x, 12px), var(--y, -18px)) rotate(12deg); } }
 
-/* rejilla */
+.wrap { position: relative; max-width: 1120px; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px 130px; overflow-x: clip; }
+
+/* ---------- héroe ---------- */
+.hero { padding: 26px 4px 30px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "titulo titulo" "lema lema" "stats cartas"; column-gap: 12px; align-items: end; }
+.hero .titulo { grid-area: titulo; } .hero .lema { grid-area: lema; } .hero .stats { grid-area: stats; align-self: start; }
+.cartas { grid-area: cartas; position: relative; width: 168px; height: 150px; font-size: 10px; margin-top: 18px; }
+@media (min-width: 700px) {
+  .hero { grid-template-columns: minmax(0, 1fr) 330px; grid-template-areas: "titulo cartas" "lema cartas" "stats cartas"; align-items: center; padding-top: 34px; }
+  .cartas { width: 330px; height: 250px; font-size: 16px; margin: 0; }
+}
+.carta { position: absolute; width: 13.5em; padding: 1em 1.1em 1.5em; background: var(--card); border: .19em solid var(--ink); border-radius: 1.2em; box-shadow: 0 .32em 0 var(--ink); }
+.carta-fuera { left: 0; top: 0; transform: rotate(-7deg); }
+.carta-dentro { right: 0; bottom: .6em; transform: rotate(5deg); }
+.carta .estrellas { display: flex; gap: .25em; margin-bottom: .55em; }
+.carta .estrellas svg { width: 1.45em; height: 1.45em; fill: var(--gold); stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.carta .estrellas svg.apagada { fill: var(--well); }
+.iv { display: flex; align-items: center; gap: .5em; margin-top: .4em; }
+.iv span { width: 3.9em; font: 600 .78em/1 var(--display); color: var(--muted); }
+.iv i { flex: 1; height: .8em; border: .13em solid var(--ink); border-radius: 1em; background: linear-gradient(90deg, transparent calc(33.3% - .07em), var(--ink) calc(33.3% - .07em) calc(33.3% + .07em), transparent 0 calc(66.6% - .07em), var(--ink) calc(66.6% - .07em) calc(66.6% + .07em), transparent 0), var(--well); overflow: hidden; position: relative; }
+.iv i::before { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--v) / 15 * 100%); background: linear-gradient(180deg, #FFC15C, #FF8A3D); border-right: .13em solid var(--ink); transform-origin: left; animation: llena .7s var(--boing) both; animation-delay: var(--t, .3s); }
+.iv i.max::before { background: linear-gradient(180deg, #FF7AA8, #F2457F); border-right: 0; }
+@keyframes llena { from { transform: scaleX(0); } }
+.sello { position: absolute; right: -.7em; bottom: -.9em; --rot: -9deg; font: 700 1.15em/1 var(--display); padding: .32em .65em .38em; border: .17em solid currentColor; border-radius: .6em; background: var(--card); transform: rotate(var(--rot)); box-shadow: 0 .2em 0 currentColor; white-space: nowrap; animation: sello .45s var(--boing) both; animation-delay: var(--t, 1s); }
+.sello-fuera { color: var(--orange); left: -.9em; top: -1.2em; right: auto; bottom: auto; --rot: -12deg; }
+.sello-dentro { color: var(--teal); }
+@keyframes sello { from { transform: rotate(var(--rot)) scale(1.7); opacity: 0; } }
+@media (max-width: 699px) { .iv span { display: none; } .orbe.lejos { display: none; } }
+@media (max-width: 359px) { .cartas { width: 132px; height: 122px; font-size: 8px; } .hero { column-gap: 8px; } }
+.titulo { font: 700 clamp(58px, 17vw, 112px)/.9 var(--display); letter-spacing: -.01em; margin: 0; color: #fff;
+  -webkit-text-stroke: 7px var(--ink); paint-order: stroke fill; text-shadow: 0 7px 0 var(--ink); }
+.lema { font: 700 clamp(18px, 4.6vw, 22px)/1.35 var(--display); margin: 16px 0 0; max-width: 30ch; }
+.stats { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 18px 0 0; padding: 0; align-content: flex-start; }
+.stats li { background: var(--card); border: var(--line); box-shadow: var(--drop-sm); border-radius: 999px; padding: 5px 13px; font-size: 14px; white-space: nowrap; }
+.stats b { font-family: var(--display); font-size: 17px; margin-right: 3px; }
+
+/* ---------- rejilla ---------- */
 .grid { display: grid; gap: 22px; grid-template-columns: minmax(0, 1fr); }
 .side, .main { min-width: 0; }
-@media (min-width: 920px) {
-  .grid { grid-template-columns: minmax(0, 1fr) 420px; align-items: start; }
-  .side { position: sticky; top: 20px; order: 2; }
+@media (min-width: 940px) {
+  .grid { grid-template-columns: minmax(0, 1fr) 430px; align-items: start; }
+  .side { position: sticky; top: 18px; order: 2; }
   .main { order: 1; }
 }
 
-/* panel de la cadena */
-.cadena-panel { background: var(--panel); color: var(--panel-ink); border-radius: 22px; padding: 18px 18px 16px; }
-.cadena-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.cadena-top h2 { font-family: var(--display); font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
-.cuenta { color: var(--panel-muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.tokens { margin: 12px 0 0; font: 13px/1.55 ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all; max-height: 9.3em; overflow: hidden; position: relative; transition: max-height .3s ease; }
+/* ---------- tarjetas ---------- */
+.tarjeta { background: var(--card); border: var(--line); border-radius: var(--r-lg); box-shadow: var(--drop); }
+.seccion { margin-top: 22px; overflow: hidden; }
+.seccion > header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--tint); border-bottom: var(--line); }
+.seccion > header h2 { font: 700 22px/1.15 var(--display); margin: 0; }
+.seccion > header p { margin: 2px 0 0; color: var(--ink-soft); font-size: 14px; font-weight: 600; }
+.icono { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--acc); border: var(--line); box-shadow: var(--drop-sm); color: #fff; }
+.icono svg { width: 24px; height: 24px; }
+[data-c="teal"] { --acc: var(--teal); --tint: var(--teal-tint); }
+[data-c="blue"] { --acc: var(--blue); --tint: var(--blue-tint); }
+[data-c="orange"] { --acc: var(--orange); --tint: var(--orange-tint); }
+[data-c="purple"] { --acc: var(--purple); --tint: var(--purple-tint); }
+[data-c="pink"] { --acc: var(--pink); --tint: var(--pink-tint); }
+.fila { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; min-height: 60px; }
+.fila + .fila { border-top: 2px dashed var(--div); }
+.fila.col { flex-direction: column; align-items: stretch; gap: 10px; }
+.txt { min-width: 0; }
+.txt b { display: block; font: 600 17px/1.25 var(--display); }
+.txt small { display: block; color: var(--muted); font-size: 14px; line-height: 1.35; margin-top: 2px; }
+
+/* ---------- panel de la cadena ---------- */
+.cadena { padding: 16px; }
+.cadena-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.cadena-top h2 { font: 700 24px/1 var(--display); margin: 0; }
+.cuenta { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pantalla { margin-top: 12px; background: var(--screen); border: var(--line); border-radius: var(--r-md); padding: 12px 12px 8px; box-shadow: inset 0 3px 0 rgba(255,255,255,.08); }
+.tokens { font: 600 13px/1.55 ui-monospace, "SF Mono", Menlo, monospace; color: var(--screen-ink); word-break: break-all; max-height: 8.6em; overflow: hidden; position: relative; }
 .tokens.abierta { max-height: none; }
-.tokens:not(.abierta)::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3.2em; background: linear-gradient(transparent, var(--panel)); }
-.tok-limites { color: var(--c-limites); } .tok-especiales { color: var(--c-especiales); } .tok-pvp { color: var(--c-pvp); }
-.tok-atacantes { color: var(--c-atacantes); } .tok-siempre { color: var(--c-siempre); } .tok-extra { color: var(--c-extra); }
-.amp { color: var(--panel-muted); }
-.ver { background: none; border: 0; color: var(--panel-ink); text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; font-size: 14px; cursor: pointer; }
-.leyenda { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--panel-muted); }
-.leyenda li::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--dot); vertical-align: 1px; }
-.resumen { margin: 14px 0 0; font-size: 15px; color: var(--panel-ink); }
-.resumen strong { color: #fff; font-weight: 650; }
-@media (prefers-color-scheme: dark) { .resumen strong { color: var(--panel-ink); } }
-.error { color: #FFB4A1; font-weight: 600; }
+.tokens:not(.abierta)::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3em; background: linear-gradient(transparent, var(--screen)); }
+.tok-limites { color: var(--t-limites); } .tok-especiales { color: var(--t-especiales); } .tok-pvp { color: var(--t-pvp); }
+.tok-atacantes { color: var(--t-atacantes); } .tok-siempre { color: var(--t-siempre); } .tok-extra { color: var(--t-extra); }
+.amp { color: var(--screen-muted); }
+.ver { background: none; border: 0; color: var(--screen-ink); text-decoration: underline; text-underline-offset: 3px; padding: 8px 0 4px; font-size: 14px; font-weight: 700; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.leyenda li::before { content: ""; display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); margin-right: 6px; background: var(--dot); vertical-align: -1px; }
+.resumen { margin: 12px 0 0; font-size: 15px; line-height: 1.45; }
+.resumen strong { font-weight: 800; }
+.error { color: #FF9C86; font-weight: 800; }
 
-/* botón copiar */
-.copiar { width: 100%; margin-top: 16px; border: 0; border-radius: 14px; padding: 17px 18px; background: var(--teal); color: #fff; font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -.01em; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: transform .15s ease, background .2s ease; }
-@media (prefers-color-scheme: dark) { .copiar { color: #072521; } }
-.copiar:active { transform: scale(.98); }
-.copiar.hecho { background: var(--gold); color: #1E1600; }
-.copiar:disabled { opacity: .45; cursor: not-allowed; }
-.barra { position: fixed; inset: auto 0 0 0; padding: 10px 16px max(12px, env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); z-index: 5; }
-.barra .copiar { margin: 0; max-width: 680px; margin-inline: auto; }
-@media (min-width: 920px) { .barra { display: none; } }
-@media (max-width: 919px) { .side .copiar { display: none; } }
+/* ---------- botones ---------- */
+.copiar { position: relative; width: 100%; margin-top: 16px; border: var(--line); border-radius: 999px; padding: 15px 18px;
+  background: linear-gradient(180deg, var(--teal-hi), var(--teal)); color: #fff; font: 700 21px/1 var(--display); letter-spacing: .01em;
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.35), var(--drop); display: flex; justify-content: center; align-items: center; gap: 10px;
+  transition: transform .18s var(--boing), box-shadow .18s ease, background .2s; text-shadow: 0 2px 0 rgba(0,0,0,.3); }
+.copiar svg { width: 22px; height: 22px; }
+.copiar:active { transform: translateY(4px); box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 1px 0 var(--ink); }
+.copiar.hecho { background: linear-gradient(180deg, #FFD966, var(--gold)); color: #1B2A3A; text-shadow: none; }
+.copiar:disabled { filter: grayscale(.8); opacity: .6; cursor: not-allowed; }
+.barra { position: fixed; inset: auto 0 0 0; padding: 10px 16px max(12px, env(safe-area-inset-bottom)); z-index: 6;
+  background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: var(--line); }
+.barra .copiar { margin: 0 auto; max-width: 640px; }
+@media (min-width: 940px) { .barra { display: none; } }
+@media (max-width: 939px) { .side .copiar { display: none; } }
+.chispa { position: fixed; width: 16px; height: 16px; pointer-events: none; z-index: 20; color: var(--c);
+  animation: chispa .75s cubic-bezier(.2, .8, .3, 1) forwards; }
+.chispa svg { width: 100%; height: 100%; display: block; }
+@keyframes chispa { 0% { transform: translate(-50%, -50%) scale(.4) rotate(0); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.15) rotate(160deg); opacity: 0; } }
+.boton { display: inline-flex; align-items: center; gap: 6px; border: var(--line); background: var(--card); padding: 10px 15px; border-radius: 999px;
+  font: 600 15px/1.1 var(--display); box-shadow: var(--drop-sm); text-decoration: none; color: inherit; transition: transform .15s var(--boing); }
+.boton:active { transform: translateY(3px); box-shadow: 0 0 0 var(--ink); }
+.boton.lleno { background: var(--acc, var(--teal)); color: #fff; }
 
-/* preajustes */
-.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--surface); border: 1px solid var(--line); padding: 5px; border-radius: 14px; }
-.presets button { border: 0; background: none; padding: 10px 6px; border-radius: 10px; font-weight: 600; cursor: pointer; }
-.presets button[aria-pressed="true"] { background: var(--teal); color: #fff; }
-@media (prefers-color-scheme: dark) { .presets button[aria-pressed="true"] { color: #072521; } }
-.presets-nota { color: var(--muted); font-size: 14px; margin: 8px 2px 0; }
+/* ---------- preajustes ---------- */
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.presets button { border: var(--line); border-radius: var(--r-md); background: var(--card); box-shadow: var(--drop-sm); padding: 10px 6px 9px; transition: transform .15s var(--boing); }
+.presets button b { display: block; font: 700 17px/1.1 var(--display); }
+.presets button small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.presets button[aria-pressed="true"] { background: var(--gold); color: #1B2A3A; }
+.presets button[aria-pressed="true"] small { color: #1B2A3A; }
+.presets button:active { transform: translateY(3px); box-shadow: none; }
+.presets-nota { color: var(--muted); font-size: 14px; margin: 10px 4px 0; }
 
-/* grupos de ajustes */
-section.grupo { margin-top: 26px; }
-section.grupo > h2 { font-family: var(--display); font-weight: 700; font-size: 23px; letter-spacing: -.015em; margin: 0 2px 4px; }
-section.grupo > p.ayuda { color: var(--muted); margin: 0 2px 10px; font-size: 15px; max-width: 60ch; }
-.lista { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
-.fila { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px 16px; min-height: 56px; }
-.fila + .fila { border-top: 1px solid var(--line); }
-.fila .txt { min-width: 0; }
-.fila .txt b { display: block; font-weight: 600; }
-.fila .txt small { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.35; margin-top: 1px; }
-.fila.col { flex-direction: column; align-items: stretch; }
-
-/* controles */
+/* ---------- controles ---------- */
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.pill { border: 1.5px solid var(--line); background: var(--surface); padding: 8px 13px; border-radius: 999px; font-weight: 600; cursor: pointer; font-variant-numeric: tabular-nums; }
-.pill[aria-pressed="true"] { border-color: var(--teal); background: var(--teal-soft); color: var(--teal); }
-.estrella { color: var(--gold); }
-.switch { position: relative; width: 51px; height: 31px; flex: none; }
-.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.switch span { position: absolute; inset: 0; background: var(--line); border-radius: 999px; transition: background .2s; pointer-events: none; }
-.switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
-.switch input:checked + span { background: var(--teal); }
-.switch input:checked + span::after { transform: translateX(20px); }
-.switch input:focus-visible + span { outline: 3px solid var(--teal); outline-offset: 2px; }
-.stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; flex: none; }
-.stepper button { width: 40px; height: 38px; border: 0; background: none; font-size: 20px; cursor: pointer; }
-.stepper output { min-width: 62px; text-align: center; font-weight: 650; font-variant-numeric: tabular-nums; font-size: 15px; }
+.pill { border: 2.5px solid var(--ink); background: var(--card); padding: 7px 13px; border-radius: 999px; font: 600 15px/1.2 var(--display);
+  box-shadow: 0 2px 0 var(--ink); transition: transform .15s var(--boing), background .15s; font-variant-numeric: tabular-nums; }
+.pill:active { transform: translateY(2px); box-shadow: none; }
+.pill[aria-pressed="true"] { background: var(--acc, var(--teal)); color: #fff; }
+.pill .est { color: var(--gold-d); }
+.pill[aria-pressed="true"] .est { color: #FFE38A; }
+.pill.tipo::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--tc); border: 2px solid var(--ink); margin-right: 6px; vertical-align: -1px; }
+.pill.tipo[aria-pressed="true"] { color: #1B2A3A; background: color-mix(in srgb, var(--tc) 55%, #fff); }
+.switch { position: relative; width: 58px; height: 34px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.switch span { position: absolute; inset: 0; background: var(--well); border: var(--line); border-radius: 999px; transition: background .2s; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2.5px solid var(--ink); transition: transform .22s var(--boing); }
+.switch input:checked + span { background: var(--acc, var(--teal)); }
+.switch input:checked + span::after { transform: translateX(24px); }
+.switch input:focus-visible + span { outline: 3px solid var(--blue); outline-offset: 2px; }
+.stepper { display: flex; align-items: center; border: var(--line); border-radius: 999px; background: var(--card); box-shadow: var(--drop-sm); flex: none; overflow: hidden; }
+.stepper button { width: 44px; height: 42px; border: 0; background: none; font: 700 22px/1 var(--display); }
+.stepper button:disabled { opacity: .3; cursor: default; }
+.stepper output { min-width: 66px; text-align: center; font: 700 16px/1 var(--display); font-variant-numeric: tabular-nums; }
 .slider { display: flex; align-items: center; gap: 14px; }
-.slider input { flex: 1; accent-color: var(--teal); height: 30px; }
-.slider output { font-family: var(--display); font-weight: 800; font-size: 30px; min-width: 76px; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.nota { color: var(--muted); font-size: 14px; margin: 4px 0 0; }
+.slider input { -webkit-appearance: none; appearance: none; flex: 1; height: 16px; border-radius: 999px; border: var(--line); background: linear-gradient(90deg, var(--blue) var(--p, 50%), var(--well) var(--p, 50%)); }
+.slider input::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: var(--gold); border: var(--line); box-shadow: var(--drop-sm); }
+.slider input::-moz-range-thumb { width: 26px; height: 26px; border-radius: 50%; background: var(--gold); border: var(--line); }
+.slider output { font: 700 34px/1 var(--display); min-width: 84px; text-align: right; font-variant-numeric: tabular-nums; }
+.nota { color: var(--muted); font-size: 14px; margin: 0; }
 .campo { display: flex; gap: 8px; }
-.campo input { flex: 1; min-width: 0; padding: 11px 13px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--paper); }
-.boton { border: 1.5px solid var(--teal); color: var(--teal); background: none; padding: 10px 15px; border-radius: 12px; font-weight: 650; cursor: pointer; white-space: nowrap; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; background: var(--teal-soft); color: var(--teal); padding: 6px 6px 6px 12px; border-radius: 999px; font-weight: 600; }
-.chip button { border: 0; background: none; color: inherit; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; }
+.campo input { flex: 1; min-width: 0; padding: 11px 14px; border: var(--line); border-radius: 999px; background: var(--well); font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; background: var(--pink-tint); border: 2.5px solid var(--ink); padding: 4px 4px 4px 12px; border-radius: 999px; font: 600 15px/1.2 var(--display); }
+.chip button { border: 0; background: none; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; line-height: 1; }
 .vacio { color: var(--muted); font-size: 14px; }
+details.mas summary { list-style: none; cursor: pointer; padding: 14px 16px; font: 600 16px/1.2 var(--display); display: flex; justify-content: space-between; }
+details.mas summary::-webkit-details-marker { display: none; }
+details.mas summary::after { content: "+"; font-size: 22px; line-height: .8; }
+details.mas[open] summary::after { content: "−"; }
+details.mas[open] summary { border-bottom: 2px dashed var(--div); }
 
-/* otras búsquedas */
-.busq .fila { align-items: center; }
-.busq code { display: block; font: 12.5px/1.4 ui-monospace, "SF Mono", Menlo, monospace; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-top: 2px; }
-.mini { border: 0; background: var(--teal-soft); color: var(--teal); font-weight: 650; padding: 9px 14px; border-radius: 10px; cursor: pointer; flex: none; }
-.mini.hecho { background: var(--gold); color: #1E1600; }
+/* ---------- búsquedas rápidas ---------- */
+.titulo-bloque { font: 700 30px/1.1 var(--display); margin: 34px 4px 4px; }
+.sub-bloque { color: var(--muted); margin: 0 4px 14px; font-size: 15px; }
+.busq-grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 680px) and (max-width: 939px) { .busq-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.busq { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.busq > header { display: flex; gap: 12px; align-items: center; padding: 14px 16px; background: var(--tint); border-bottom: var(--line); }
+.busq > header h3 { font: 700 19px/1.15 var(--display); margin: 0; }
+.busq > header p { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+.busq .opciones { padding: 12px 16px 4px; display: grid; gap: 12px; }
+.busq .grupo-op > span { display: block; font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 6px; }
+.busq .pills { gap: 6px; }
+.busq .pill { font-size: 14px; padding: 6px 11px; }
+.busq footer { margin-top: auto; padding: 12px 16px 16px; display: flex; gap: 10px; align-items: center; }
+.busq code { flex: 1; min-width: 0; display: block; background: var(--screen); color: var(--screen-ink); border: var(--line); border-radius: var(--r-sm); padding: 9px 11px; font: 600 12.5px/1.35 ui-monospace, "SF Mono", Menlo, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini { flex: none; border: var(--line); border-radius: 999px; padding: 11px 16px; background: var(--acc); color: #fff; font: 700 15px/1 var(--display); box-shadow: var(--drop-sm); transition: transform .15s var(--boing); }
+.mini:active { transform: translateY(3px); box-shadow: none; }
+.mini.hecho { background: var(--gold); color: #1B2A3A; }
+.mini:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.nota-busq { margin: 0; padding: 4px 16px 0; color: var(--muted); font-size: 13.5px; line-height: 1.4; }
 
-/* listas protegidas */
-details.bloque { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 16px; }
-details.bloque + details.bloque { margin-top: 10px; }
-details.bloque summary { cursor: pointer; padding: 15px 0; font-weight: 650; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
-details.bloque summary::-webkit-details-marker { display: none; }
-details.bloque summary::after { content: "+"; font-size: 20px; line-height: 1; color: var(--muted); }
-details.bloque[open] summary::after { content: "−"; }
-.liga h3, .tipo h3 { font-size: 15px; margin: 12px 0 6px; }
-ol.rank { margin: 0 0 14px; padding: 0; list-style: none; columns: 2 170px; column-gap: 18px; font-size: 14px; }
+/* ---------- listas ---------- */
+.liga h4, .tipo-fila b { font: 600 16px/1.2 var(--display); }
+.liga { padding: 4px 16px 10px; }
+.liga h4 { margin: 12px 0 6px; }
+ol.rank { margin: 0; padding: 0; list-style: none; columns: 2 160px; column-gap: 16px; font-size: 14px; }
 ol.rank li { display: flex; gap: 8px; break-inside: avoid; padding: 2px 0; }
 ol.rank li span { color: var(--muted); min-width: 2.2em; text-align: right; font-variant-numeric: tabular-nums; }
-.tipo { display: grid; grid-template-columns: 92px 1fr; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
-.tipo:first-of-type { border-top: 0; }
-.tipo b { display: flex; align-items: center; gap: 7px; }
-.tipo b::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--tc); flex: none; }
+.tipo-fila { display: grid; grid-template-columns: 100px 1fr; gap: 10px; padding: 10px 16px; font-size: 14px; }
+.tipo-fila + .tipo-fila { border-top: 2px dashed var(--div); }
+.tipo-fila b { display: flex; align-items: center; gap: 8px; }
+.tipo-fila b::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--tc); border: 2px solid var(--ink); flex: none; }
 
-footer { margin-top: 34px; color: var(--muted); font-size: 14px; }
-footer a { color: var(--teal); }
-footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-.aviso { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 12px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 10; }
+footer.pie { margin-top: 34px; color: var(--muted); font-size: 14px; }
+footer.pie .acciones { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+footer.pie a:not(.boton) { color: inherit; }
+.aviso { position: fixed; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom)); transform: translate(-50%, 16px); z-index: 30; opacity: 0; pointer-events: none;
+  background: var(--card); color: var(--fg); border: var(--line); box-shadow: var(--drop-sm); padding: 10px 16px; border-radius: 999px; font: 600 15px/1.2 var(--display); transition: opacity .2s, transform .25s var(--boing); max-width: calc(100% - 32px); text-align: center; }
 .aviso.ver { opacity: 1; transform: translate(-50%, 0); }
-@media (min-width: 920px) { .aviso { bottom: 28px; } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+@media (min-width: 940px) { .aviso { bottom: 28px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
+<div class="cielo" aria-hidden="true">
+  <span class="orbe" style="--c:#EE8130; width:40px; height:40px; right:5%; top:14px; --d:13s; --x:-10px; --y:10px"></span>
+  <span class="orbe" style="--c:#6390F0; width:22px; height:22px; right:24%; top:8px; --d:11s; --x:8px; --y:8px"></span>
+  <span class="orbe lejos" style="--c:#F7D02C; width:30px; height:30px; left:56%; top:210px; --d:9s; --x:-8px; --y:-12px"></span>
+  <span class="orbe lejos" style="--c:#A98FF3; width:46px; height:46px; left:52%; top:60px; --d:15s; --x:12px; --y:-10px"></span>
+  <span class="orbe lejos" style="--c:#7AC74C; width:24px; height:24px; right:2%; top:130px; --d:10s; --x:-10px; --y:10px"></span>
+  <span class="orbe" style="--c:#F95587; width:18px; height:18px; right:40%; top:20px; --d:12s; --x:8px; --y:-8px"></span>
+</div>
+
 <div class="wrap">
-  <header>
-    <h1>Papelera</h1>
-    <p class="lead">Tu búsqueda para vaciar el almacenamiento de Pokémon GO sin perder nada bueno. Se actualiza sola cada día con el meta y los mejores atacantes.</p>
+  <header class="hero">
+    <h1 class="titulo">Papelera</h1>
+    <p class="lema">Vacía tu almacenamiento de Pokémon GO sin perder nada bueno.</p>
+    <ul class="stats">
+      <li><b id="st-meta">0</b> del meta PvP</li>
+      <li><b id="st-atk">0</b> atacantes</li>
+      <li id="st-fecha"></li>
+    </ul>
+    <div class="cartas" aria-hidden="true">
+      <div class="carta carta-fuera">
+        <div class="estrellas"><svg viewBox="0 0 24 24" class="apagada"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></svg><svg viewBox="0 0 24 24" class="apagada"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></svg><svg viewBox="0 0 24 24" class="apagada"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></svg></div>
+        <div class="iv"><span>Ataque</span><i style="--v:3; --t:.35s"></i></div>
+        <div class="iv"><span>Defensa</span><i style="--v:8; --t:.45s"></i></div>
+        <div class="iv"><span>PS</span><i style="--v:5; --t:.55s"></i></div>
+        <b class="sello sello-fuera" style="--t:1.05s">A la papelera</b>
+      </div>
+      <div class="carta carta-dentro">
+        <div class="estrellas"><svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9L12 2.8z"/></svg></div>
+        <div class="iv"><span>Ataque</span><i class="max" style="--v:15; --t:.55s"></i></div>
+        <div class="iv"><span>Defensa</span><i style="--v:13; --t:.65s"></i></div>
+        <div class="iv"><span>PS</span><i class="max" style="--v:15; --t:.75s"></i></div>
+        <b class="sello sello-dentro" style="--t:1.35s">Se queda</b>
+      </div>
+    </div>
   </header>
 
   <div class="grid">
     <aside class="side">
-      <div class="cadena-panel" id="panel">
-        <div class="cadena-top">
-          <h2>Tu cadena</h2>
-          <span class="cuenta" id="cuenta"></span>
+      <section class="tarjeta cadena" aria-labelledby="h-cadena">
+        <div class="cadena-top"><h2 id="h-cadena">Tu cadena</h2><span class="cuenta" id="cuenta"></span></div>
+        <div class="pantalla">
+          <div class="tokens" id="tokens" aria-live="polite"></div>
+          <button class="ver" id="ver" type="button">Ver la cadena entera</button>
         </div>
-        <div class="tokens" id="tokens" aria-live="polite"></div>
-        <button class="ver" id="ver" type="button">Ver la cadena entera</button>
         <ul class="leyenda">
-          <li style="--dot: var(--c-limites)">Estrellas y PC</li>
-          <li style="--dot: var(--c-especiales)">Especiales</li>
-          <li style="--dot: var(--c-pvp)">Meta PvP</li>
-          <li style="--dot: var(--c-atacantes)">Atacantes</li>
-          <li style="--dot: var(--c-siempre)">Siempre guardar</li>
+          <li style="--dot: var(--t-limites)">Estrellas y PC</li>
+          <li style="--dot: var(--t-especiales)">Especiales</li>
+          <li style="--dot: var(--t-pvp)">Meta PvP</li>
+          <li style="--dot: var(--t-atacantes)">Atacantes</li>
+          <li style="--dot: var(--t-siempre)">Siempre guardar</li>
         </ul>
         <p class="resumen" id="resumen"></p>
-        <button class="copiar" data-copiar type="button">Copiar cadena</button>
-      </div>
+        <button class="copiar" data-copiar type="button"></button>
+      </section>
     </aside>
 
     <main class="main">
       <div class="presets" role="group" aria-label="Preajustes">
-        <button type="button" data-preset="prudente" aria-pressed="false">Prudente</button>
-        <button type="button" data-preset="normal" aria-pressed="false">Normal</button>
-        <button type="button" data-preset="fondo" aria-pressed="false">A fondo</button>
+        <button type="button" data-preset="prudente" aria-pressed="false"><b>Prudente</b><small>Guarda más</small></button>
+        <button type="button" data-preset="normal" aria-pressed="false"><b>Normal</b><small>Tu config</small></button>
+        <button type="button" data-preset="fondo" aria-pressed="false"><b>A fondo</b><small>Libera más</small></button>
       </div>
       <p class="presets-nota" id="presets-nota"></p>
 
-      <section class="grupo">
-        <h2>Qué puede ir a la papelera</h2>
-        <div class="lista">
-          <div class="fila col">
-            <div class="txt"><b>Estrellas</b><small>Los de 4 estrellas nunca se tocan.</small></div>
-            <div class="pills" id="estrellas"></div>
-          </div>
-          <div class="fila col">
-            <div class="txt"><b>PC máximo</b><small>Lo que pase de aquí se queda.</small></div>
-            <div class="pills" id="pc"></div>
-          </div>
+      <section class="tarjeta seccion" data-c="teal">
+        <header><span class="icono" data-icono="papelera"></span><div><h2>Qué puede ir a la papelera</h2><p>Lo que no cumpla esto, se queda.</p></div></header>
+        <div class="fila col"><div class="txt"><b>Estrellas</b><small>Los de 4 estrellas nunca se tocan.</small></div><div class="pills" id="estrellas"></div></div>
+        <div class="fila col"><div class="txt"><b>PC máximo</b><small>Lo que pase de aquí se queda.</small></div><div class="pills" id="pc"></div></div>
+      </section>
+
+      <section class="tarjeta seccion" data-c="blue">
+        <header><span class="icono" data-icono="pvp"></span><div><h2>PvP</h2><p>Guarda los del meta que llegan a este % en su liga, como el de Poke Genie.</p></div></header>
+        <div class="fila col">
+          <div class="slider"><input type="range" id="pvpmin" min="90" max="99" step="1" aria-label="Porcentaje mínimo en PvP"><output id="pvpmin-out"></output></div>
+          <p class="nota" id="pvpmin-nota"></p>
         </div>
+        <div id="ligas"></div>
       </section>
 
-      <section class="grupo">
-        <h2>PvP</h2>
-        <p class="ayuda">Se guardan los Pokémon del meta que pueden llegar a este % de su mejor versión en su liga, como el % de Poke Genie.</p>
-        <div class="lista">
-          <div class="fila col">
-            <div class="slider">
-              <input type="range" id="pvpmin" min="90" max="99" step="1" aria-label="Porcentaje mínimo en PvP">
-              <output id="pvpmin-out"></output>
-            </div>
-            <p class="nota" id="pvpmin-nota"></p>
-          </div>
-          <div id="ligas"></div>
-        </div>
+      <section class="tarjeta seccion" data-c="orange">
+        <header><span class="icono" data-icono="incursion"></span><div><h2>Incursiones</h2><p>Los mejores atacantes de cada tipo, megas incluidas.</p></div></header>
+        <div class="fila"><div class="txt"><b>Atacantes por tipo</b><small>Los mejores de cada uno de los 18 tipos. Los legendarios ya van protegidos como especiales.</small></div>
+          <div class="stepper" id="step-atk"><button type="button" aria-label="Menos">−</button><output></output><button type="button" aria-label="Más">+</button></div></div>
+        <div class="fila col"><div class="txt"><b>Ataque mínimo para guardarlos</b><small>En incursiones lo que más cuenta es el ataque.</small></div><div class="pills" id="ataque"></div></div>
       </section>
 
-      <section class="grupo">
-        <h2>Incursiones</h2>
-        <p class="ayuda">Los mejores atacantes de cada tipo, megas incluidas. Se guardan los que tienen buen ataque, que es lo que cuenta en incursiones.</p>
-        <div class="lista">
-          <div class="fila">
-            <div class="txt"><b>Atacantes por tipo</b><small>Los mejores de cada uno de los 18 tipos.</small></div>
-            <div class="stepper" data-step="atacantes"><button type="button" aria-label="Menos">−</button><output></output><button type="button" aria-label="Más">+</button></div>
-          </div>
-          <div class="fila col">
-            <div class="txt"><b>Ataque mínimo para guardarlos</b></div>
-            <div class="pills" id="ataque"></div>
-          </div>
-        </div>
+      <section class="tarjeta seccion" data-c="purple">
+        <header><span class="icono" data-icono="escudo"></span><div><h2>Proteger también</h2><p>Extras que nunca saldrán en la papelera.</p></div></header>
+        <div id="extras"></div>
       </section>
 
-      <section class="grupo">
-        <h2>Proteger también</h2>
-        <div class="lista" id="extras"></div>
-      </section>
-
-      <section class="grupo">
-        <h2>Siempre guardar</h2>
-        <p class="ayuda">Especies que quieres conservar con cualquier IV, con toda su familia. Escribe el nombre en inglés o el número de la Pokédex.</p>
-        <div class="lista"><div class="fila col">
+      <section class="tarjeta seccion" data-c="pink">
+        <header><span class="icono" data-icono="corazon"></span><div><h2>Siempre guardar</h2><p>Especies que quieres con cualquier IV, con toda su familia.</p></div></header>
+        <div class="fila col">
           <form class="campo" id="form-siempre" autocomplete="off">
-            <input id="input-siempre" list="lista-especies" placeholder="Por ejemplo, Skwovet o 819" aria-label="Especie para guardar siempre">
-            <button class="boton" type="submit">Añadir</button>
+            <label class="sr" for="input-siempre">Especie para guardar siempre</label>
+            <input id="input-siempre" list="lista-especies" placeholder="Nombre en inglés o número">
+            <button class="boton lleno" style="--acc: var(--pink)" type="submit">Añadir</button>
           </form>
           <datalist id="lista-especies"></datalist>
           <div class="chips" id="chips-siempre"></div>
-        </div></div>
+        </div>
       </section>
 
-      <section class="grupo">
-        <h2>Especiales</h2>
-        <p class="ayuda">Están todos protegidos. Desactiva alguno solo si sabes que quieres limpiarlo.</p>
-        <details class="bloque"><summary>Ver los 12 tipos de especiales</summary><div id="especiales" style="margin: 0 -16px"></div></details>
+      <section class="tarjeta seccion" data-c="teal">
+        <header><span class="icono" data-icono="chispa"></span><div><h2>Especiales</h2><p>Todos protegidos. Quita alguno solo si quieres limpiarlo.</p></div></header>
+        <details class="mas"><summary>Ver los 12 tipos de especiales</summary><div id="especiales"></div></details>
       </section>
 
-      <section class="grupo">
-        <h2>Otras búsquedas</h2>
-        <p class="ayuda">Para revisar, subir o evolucionar. Se adaptan a tus ajustes.</p>
-        <div class="lista busq" id="busquedas"></div>
+      <h2 class="titulo-bloque" id="busquedas-h">Búsquedas rápidas</h2>
+      <p class="sub-bloque">Elige las opciones y cópiala con un toque.</p>
+      <div class="busq-grid" id="busquedas" role="group" aria-labelledby="busquedas-h"></div>
+
+      <section class="tarjeta seccion" data-c="blue">
+        <header><span class="icono" data-icono="lista"></span><div><h2>Qué se protege ahora</h2><p>Según tus ajustes.</p></div></header>
+        <details class="mas"><summary id="sum-meta">Meta PvP</summary><div id="meta"></div></details>
+        <details class="mas" style="border-top: var(--line)"><summary id="sum-atk">Atacantes por tipo</summary><div id="atk"></div></details>
       </section>
 
-      <section class="grupo">
-        <h2>Qué se protege ahora</h2>
-        <details class="bloque"><summary id="sum-meta">Meta PvP</summary><div id="meta"></div></details>
-        <details class="bloque"><summary id="sum-atk">Atacantes por tipo</summary><div id="atk"></div></details>
-      </section>
-
-      <footer>
+      <footer class="pie">
         <p id="fechas"></p>
         <p>El atajo del iPhone copia la cadena con los ajustes de <code>config.json</code>. Para que use los de esta página, copia los ajustes y pégalos en ese archivo.</p>
         <div class="acciones">
@@ -282,13 +390,13 @@ footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
           <a class="boton" href="https://github.com/Terri-Lorca/papelera-pogo/actions/workflows/papelera.yml">Actualizar ahora</a>
           <button class="boton" type="button" id="restablecer">Restablecer</button>
         </div>
-        <p>Datos de <a href="https://pvpoke.com">PvPoke</a> y del juego (PokeMiners). El buscador solo ve las barras de la valoración, no los IV exactos, así que algunos Pokémon que no llegan al % se guardan por si acaso. Nunca al revés.</p>
+        <p>Datos de <a href="https://pvpoke.com">PvPoke</a> y del juego (PokeMiners). El buscador solo ve las barras de la valoración, no los IV exactos: algunos Pokémon que no llegan al % se guardan por si acaso, nunca al revés. Página hecha por un fan, sin relación con Niantic, Nintendo ni The Pokémon Company.</p>
       </footer>
     </main>
   </div>
 </div>
 
-<div class="barra"><button class="copiar" data-copiar type="button">Copiar cadena</button></div>
+<div class="barra"><button class="copiar" data-copiar type="button"></button></div>
 <div class="aviso" id="aviso" role="status"></div>
 
 <script>/*__PAPELERA_JS__*/</script>
@@ -297,91 +405,122 @@ footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
   'use strict';
   const DATOS = "__DATOS__";
   const P = window.Papelera;
-  const CLAVE = 'papelera.ajustes.v2';
+  const CLAVE = 'papelera.ajustes.v2', CLAVE_B = 'papelera.busquedas.v1';
   const $ = (s, el = document) => el.querySelector(s);
   const num = (n) => n.toLocaleString('es-ES');
-  const base = P.normalizar(DATOS.config, DATOS.config);
   const clonar = (o) => JSON.parse(JSON.stringify(o));
+  const base = P.normalizar(DATOS.config, DATOS.config);
+  const reducir = matchMedia('(prefers-reduced-motion: reduce)');
 
+  const ICONOS = {
+    papelera: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+    pvp: '<path d="M4 4l9 9M4 4h4M4 4v4M20 4l-9 9M20 4h-4M20 4v4M8 14l-4 4 2 2 4-4M16 14l4 4-2 2-4-4"/>',
+    incursion: '<path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3-1-3 0-6 1-9z"/>',
+    escudo: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/>',
+    corazon: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    chispa: '<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6z"/>',
+    lista: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+    copiar: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+    estrella: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z"/>',
+  };
+  const svg = (k, relleno) => `<svg viewBox="0 0 24 24" fill="${relleno ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONOS[k]}</svg>`;
+  document.querySelectorAll('[data-icono]').forEach((el) => { el.innerHTML = svg(el.dataset.icono); });
+  const TXT_COPIAR = svg('copiar') + '<span>Copiar cadena</span>';
+  document.querySelectorAll('[data-copiar]').forEach((b) => { b.innerHTML = TXT_COPIAR; });
+
+  const COLORES_TIPO = { normal: '#A8A77A', fire: '#EE8130', water: '#6390F0', grass: '#7AC74C', electric: '#F7D02C', ice: '#96D9D6', fighting: '#C22E28', poison: '#A33EA1', ground: '#E2BF65', flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A', rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC', dark: '#705746', steel: '#B7B7CE', fairy: '#D685AD' };
+  const especiesPorId = new Map(DATOS.especies.map((e) => [e[0], e]));
+
+  // ---------- ajustes de la papelera ----------
   const PRESETS = {
     normal: () => clonar(base),
     prudente: () => Object.assign(clonar(base), {
       estrellas_papelera: [0, 1, 2], pc_maximo: 1500, pvp_minimo: 93,
       top_pvp: { liga_500: 100, super_ball: 100, ultra_ball: 100, master_ball: 50 },
       top_atacantes_por_tipo: 15, ataque_minimo_atacantes: 11,
-      proteger: Object.assign(clonar(base.proteger), { listos_para_liga: true, nundos: true, tamanos: true }),
+      proteger: Object.assign(clonar(base.proteger), { listos_para_liga: true, nundos: true, tamanos: true, unicos: true }),
     }),
     fondo: () => Object.assign(clonar(base), {
       estrellas_papelera: [0, 1, 2, 3], pc_maximo: null, pvp_minimo: 98,
       top_pvp: { liga_500: 25, super_ball: 25, ultra_ball: 25, master_ball: 15 },
       top_atacantes_por_tipo: 6, ataque_minimo_atacantes: 15,
-      proteger: Object.assign(clonar(base.proteger), { listos_para_liga: false, nundos: false, tamanos: false, evolucionables: false }),
+      proteger: Object.assign(clonar(base.proteger), { listos_para_liga: false, nundos: false, tamanos: false, evolucionables: false, unicos: false }),
     }),
   };
   const NOTA_PRESET = {
-    normal: 'Tus ajustes de config.json: lo que copia el atajo.',
-    prudente: 'Guarda más: hasta 2 estrellas y 1.500 PC, más meta y más atacantes.',
-    fondo: 'Libera más espacio: solo el meta de verdad (98 %) y atacantes con 15 de ataque.',
+    normal: 'Tus ajustes de config.json: lo mismo que copia el atajo.',
+    prudente: 'Guarda más: hasta 2 estrellas y 1500 PC, más meta, más atacantes y nunca el único de su especie.',
+    fondo: 'Libera más espacio: solo el meta de verdad (98 %) y atacantes con 15 de ataque.',
   };
-
   let cfg;
   try { cfg = P.normalizar(JSON.parse(localStorage.getItem(CLAVE)), base); } catch (_) { cfg = null; }
   if (!cfg || !cfg.top_pvp) cfg = clonar(base);
   let ultimo = null;
+  const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(cfg)); } catch (_) {} };
+  const igual = (a, b) => JSON.stringify(P.normalizar(a, base)) === JSON.stringify(P.normalizar(b, base));
 
-  function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(cfg)); } catch (_) {} }
-  function igual(a, b) { return JSON.stringify(P.normalizar(a, base)) === JSON.stringify(P.normalizar(b, base)); }
-
-  // ---------- copiar ----------
+  // ---------- copiar, aviso y chispas ----------
   function aviso(t) {
     const a = $('#aviso'); a.textContent = t; a.classList.add('ver');
-    clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('ver'), 1800);
+    clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('ver'), 1900);
   }
   async function copiarTexto(texto) {
     try { await navigator.clipboard.writeText(texto); return true; } catch (_) {
       const t = document.createElement('textarea'); t.value = texto; t.setAttribute('readonly', '');
-      t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select();
-      t.setSelectionRange(0, texto.length);
+      t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); t.setSelectionRange(0, texto.length);
       let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
       t.remove(); return ok;
     }
   }
-  function marcarHecho(btn, texto, original) {
-    btn.classList.add('hecho'); btn.textContent = texto;
-    setTimeout(() => { btn.classList.remove('hecho'); btn.textContent = original; }, 1600);
+  function chispas(el) {
+    if (reducir.matches) return;
+    const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const colores = ['#FFC83D', '#EE8130', '#6390F0', '#13B89B', '#F95587', '#A98FF3'];
+    for (let i = 0; i < 12; i++) {
+      const s = document.createElement('span'); s.className = 'chispa'; s.innerHTML = svg('estrella', true);
+      const ang = (Math.PI * 2 * i) / 12 + Math.random() * .4, dist = 60 + Math.random() * 50;
+      s.style.left = cx + 'px'; s.style.top = cy + 'px'; s.style.setProperty('--c', colores[i % colores.length]);
+      s.style.setProperty('--dx', Math.cos(ang) * dist + 'px'); s.style.setProperty('--dy', Math.sin(ang) * dist * .7 + 'px');
+      document.body.appendChild(s); setTimeout(() => s.remove(), 800);
+    }
+  }
+  function hecho(btn, html, original) {
+    btn.classList.add('hecho'); btn.innerHTML = html;
+    clearTimeout(btn._t); btn._t = setTimeout(() => { btn.classList.remove('hecho'); btn.innerHTML = original; }, 1600);
   }
   document.querySelectorAll('[data-copiar]').forEach((b) => b.addEventListener('click', async () => {
     if (!ultimo || !ultimo.cadena) return;
-    const ok = await copiarTexto(ultimo.cadena);
-    if (ok) { document.querySelectorAll('[data-copiar]').forEach((x) => marcarHecho(x, 'Cadena copiada', 'Copiar cadena')); aviso('Pégala en el buscador del juego'); }
-    else aviso('No se pudo copiar. Abre "Ver la cadena entera" y cópiala a mano.');
+    if (await copiarTexto(ultimo.cadena)) {
+      document.querySelectorAll('[data-copiar]').forEach((x) => hecho(x, svg('estrella', true) + '<span>¡Copiada!</span>', TXT_COPIAR));
+      chispas(b); aviso('Pégala en el buscador del juego');
+    } else aviso('No se pudo copiar. Abre la cadena entera y cópiala a mano.');
   }));
 
-  // ---------- controles ----------
-  function pill(texto, activo, onClick, extra) {
+  // ---------- piezas de interfaz ----------
+  function pill(html, activo, onClick, label, clase) {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'pill'; b.setAttribute('aria-pressed', String(!!activo));
-    b.innerHTML = texto; if (extra) b.setAttribute('aria-label', extra);
+    b.type = 'button'; b.className = 'pill' + (clase ? ' ' + clase : ''); b.setAttribute('aria-pressed', String(!!activo));
+    b.innerHTML = html; if (label) b.setAttribute('aria-label', label);
     b.addEventListener('click', onClick); return b;
   }
   function filaSwitch(cont, titulo, detalle, valor, onChange) {
     const f = document.createElement('label'); f.className = 'fila';
-    f.innerHTML = `<span class="txt"><b></b>${detalle ? '<small></small>' : ''}</span><span class="switch"><input type="checkbox"><span></span></span>`;
-    f.querySelector('b').textContent = titulo; if (detalle) f.querySelector('small').textContent = detalle;
+    f.innerHTML = '<span class="txt"><b></b><small></small></span><span class="switch"><input type="checkbox"><span></span></span>';
+    f.querySelector('b').textContent = titulo;
+    if (detalle) f.querySelector('small').textContent = detalle; else f.querySelector('small').remove();
     const i = f.querySelector('input'); i.checked = !!valor; i.addEventListener('change', () => onChange(i.checked));
     cont.appendChild(f);
   }
   function stepper(el, valor, min, max, paso, fmt, onChange) {
-    const [menos, out, mas] = [el.children[0], el.children[1], el.children[2]];
-    out.textContent = fmt(valor);
-    menos.disabled = valor <= min; mas.disabled = valor >= max;
-    menos.onclick = () => onChange(Math.max(min, valor - paso));
-    mas.onclick = () => onChange(Math.min(max, valor + paso));
+    const [menos, out, mas] = el.children;
+    out.textContent = fmt(valor); menos.disabled = valor <= min; mas.disabled = valor >= max;
+    menos.onclick = () => onChange(Math.max(min, valor - paso)); mas.onclick = () => onChange(Math.min(max, valor + paso));
   }
-  function cambiar(fn) { fn(); guardar(); pintar(); }
+  const cambiar = (fn) => { fn(); guardar(); pintar(); };
 
   const EXTRAS = [
-    ['listos_para_liga', 'Listos para Super y Ultra Ball', 'Entre 1.400 y 1.500 PC, y entre 2.300 y 2.500 PC.'],
+    ['listos_para_liga', 'Listos para Super y Ultra Ball', 'Entre 1400 y 1500 PC, y entre 2300 y 2500 PC.'],
+    ['unicos', 'El único de su especie', 'Nunca te deja sin ninguno, cuando solo tienes uno.'],
     ['nundos', 'Nundos', 'Los de 0/0/0, por si los coleccionas.'],
     ['tamanos', 'Tamaños XXL y XXS', 'Para exhibiciones y medallas.'],
     ['evolucionables', 'Los que puedes evolucionar ya', 'Para evolucionarlos con un Huevo Suerte.'],
@@ -392,35 +531,33 @@ footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
     ['gigamax', 'Gigamax'], ['especial', 'Con ataques especiales'], ['intercambiados', 'Intercambiados', 'Incluye todos los Pokémon con suerte.'],
     ['etiquetados', 'Con etiqueta', 'Etiqueta lo que quieras guardar y no saldrá nunca.'],
   ];
-  const COLORES_TIPO = { normal: '#9FA19F', fire: '#E62829', water: '#2980EF', grass: '#3FA129', electric: '#FAC000', ice: '#3DCEF3', fighting: '#FF8000', poison: '#9141CB', ground: '#915121', flying: '#81B9EF', psychic: '#EF4179', bug: '#91A119', rock: '#AFA981', ghost: '#704170', dragon: '#5060E1', dark: '#624D4E', steel: '#60A1B8', fairy: '#EF70EF' };
   const PCS = [null, 1500, 2000, 2500, 3000];
-  const especiesPorId = new Map(DATOS.especies.map((e) => [e[0], e]));
 
   function pintarControles() {
     const est = $('#estrellas'); est.innerHTML = '';
     for (let n = 0; n <= 3; n++) {
       const on = cfg.estrellas_papelera.includes(n);
-      est.appendChild(pill(`${n} <span class="estrella">★</span>`, on, () => cambiar(() => {
-        const s = new Set(cfg.estrellas_papelera); on ? s.delete(n) : s.add(n);
-        cfg.estrellas_papelera = Array.from(s).sort();
+      est.appendChild(pill(`${n} <span class="est">★</span>`, on, () => cambiar(() => {
+        const s = new Set(cfg.estrellas_papelera); on ? s.delete(n) : s.add(n); cfg.estrellas_papelera = Array.from(s).sort();
       }), `${n} estrellas`));
     }
     const pc = $('#pc'); pc.innerHTML = '';
     const lista = PCS.includes(cfg.pc_maximo) ? PCS : PCS.concat([cfg.pc_maximo]).sort((a, b) => (a || 0) - (b || 0));
     for (const v of lista) pc.appendChild(pill(v ? num(v) : 'Sin límite', cfg.pc_maximo === v, () => cambiar(() => { cfg.pc_maximo = v; })));
 
-    $('#pvpmin').value = cfg.pvp_minimo; $('#pvpmin-out').textContent = cfg.pvp_minimo + ' %';
+    const sl = $('#pvpmin'); sl.value = cfg.pvp_minimo; sl.style.setProperty('--p', ((cfg.pvp_minimo - 90) / 9 * 100) + '%');
+    $('#pvpmin-out').textContent = cfg.pvp_minimo + '\u00a0%';
     const ligas = $('#ligas'); ligas.innerHTML = '';
     for (const l of DATOS.ligas) {
       const f = document.createElement('div'); f.className = 'fila';
-      f.innerHTML = `<div class="txt"><b></b><small></small></div><div class="stepper"><button type="button" aria-label="Menos">−</button><output></output><button type="button" aria-label="Más">+</button></div>`;
-      f.querySelector('b').textContent = l.nombre;
+      f.innerHTML = '<div class="txt"><b></b><small></small></div><div class="stepper"><button type="button" aria-label="Menos">−</button><output></output><button type="button" aria-label="Más">+</button></div>';
       const v = cfg.top_pvp[l.id] || 0;
+      f.querySelector('b').textContent = l.nombre;
       f.querySelector('small').textContent = v ? `Los ${v} primeros del ranking de PvPoke.` : 'No se protege.';
       stepper(f.querySelector('.stepper'), v, 0, 100, 10, (x) => (x ? 'Top ' + x : 'No'), (x) => cambiar(() => { cfg.top_pvp[l.id] = x; }));
       ligas.appendChild(f);
     }
-    stepper($('[data-step="atacantes"]'), cfg.top_atacantes_por_tipo, 0, 15, 1, (x) => (x ? 'Top ' + x : 'No'), (x) => cambiar(() => { cfg.top_atacantes_por_tipo = x; }));
+    stepper($('#step-atk'), cfg.top_atacantes_por_tipo, 0, 15, 1, (x) => (x ? 'Top ' + x : 'No'), (x) => cambiar(() => { cfg.top_atacantes_por_tipo = x; }));
     const at = $('#ataque'); at.innerHTML = '';
     at.appendChild(pill('11 a 15', cfg.ataque_minimo_atacantes === 11, () => cambiar(() => { cfg.ataque_minimo_atacantes = 11; })));
     at.appendChild(pill('Solo 15', cfg.ataque_minimo_atacantes === 15, () => cambiar(() => { cfg.ataque_minimo_atacantes = 15; })));
@@ -436,130 +573,202 @@ footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
       const e = especiesPorId.get(id); if (!e) continue;
       const c = document.createElement('span'); c.className = 'chip';
       c.innerHTML = '<span></span><button type="button">×</button>';
-      c.firstChild.textContent = e[1];
-      c.lastChild.setAttribute('aria-label', 'Quitar ' + e[1]);
+      c.firstChild.textContent = e[1]; c.lastChild.setAttribute('aria-label', 'Quitar ' + e[1]);
       c.lastChild.onclick = () => cambiar(() => { cfg.siempre_guardar = cfg.siempre_guardar.filter((x) => x !== id); });
       chips.appendChild(c);
     }
-
-    document.querySelectorAll('[data-preset]').forEach((b) => {
-      const on = igual(cfg, PRESETS[b.dataset.preset]());
-      b.setAttribute('aria-pressed', String(on));
-    });
     const activo = Object.keys(PRESETS).find((k) => igual(cfg, PRESETS[k]()));
+    document.querySelectorAll('[data-preset]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.preset === activo)));
     $('#presets-nota').textContent = activo ? NOTA_PRESET[activo] : 'Ajustes personalizados. Se guardan en este navegador.';
   }
 
-  $('#pvpmin').addEventListener('input', (e) => { cfg.pvp_minimo = Number(e.target.value); $('#pvpmin-out').textContent = cfg.pvp_minimo + ' %'; programar(); });
+  $('#pvpmin').addEventListener('input', (e) => {
+    cfg.pvp_minimo = Number(e.target.value); $('#pvpmin-out').textContent = cfg.pvp_minimo + '\u00a0%';
+    e.target.style.setProperty('--p', ((cfg.pvp_minimo - 90) / 9 * 100) + '%');
+    clearTimeout(pintarCadena.t); pintarCadena.t = setTimeout(() => { guardar(); pintarCadena(); }, 120);
+  });
   $('#pvpmin').addEventListener('change', () => { guardar(); pintar(); });
-  let tPintar;
-  function programar() { clearTimeout(tPintar); tPintar = setTimeout(() => { guardar(); pintarCadena(); }, 120); }
-
   document.querySelectorAll('[data-preset]').forEach((b) => b.addEventListener('click', () => cambiar(() => { cfg = PRESETS[b.dataset.preset](); })));
   $('#form-siempre').addEventListener('submit', (ev) => {
     ev.preventDefault();
-    const q = $('#input-siempre').value.trim().toLowerCase();
-    if (!q) return;
+    const q = $('#input-siempre').value.trim().toLowerCase(); if (!q) return;
     const n = Number(q);
-    const e = DATOS.especies.find((x) => (n ? x[2] === n : x[1].toLowerCase() === q || x[0] === q))
-      || DATOS.especies.find((x) => !n && x[1].toLowerCase().startsWith(q));
+    const e = DATOS.especies.find((x) => (n ? x[2] === n : x[1].toLowerCase() === q || x[0] === q)) || DATOS.especies.find((x) => !n && x[1].toLowerCase().startsWith(q));
     if (!e) { aviso('No encuentro esa especie. Prueba con el nombre en inglés.'); return; }
     $('#input-siempre').value = '';
     if (!cfg.siempre_guardar.includes(e[0])) cambiar(() => { cfg.siempre_guardar.push(e[0]); });
     aviso(e[1] + ' y su familia se guardan siempre');
   });
   $('#ver').addEventListener('click', () => {
-    const t = $('#tokens'); const abierta = t.classList.toggle('abierta');
-    $('#ver').textContent = abierta ? 'Ver menos' : 'Ver la cadena entera';
+    const abierta = $('#tokens').classList.toggle('abierta'); $('#ver').textContent = abierta ? 'Ver menos' : 'Ver la cadena entera';
   });
   $('#restablecer').addEventListener('click', () => cambiar(() => { cfg = clonar(base); }));
   $('#copiar-config').addEventListener('click', async (ev) => {
-    const out = P.normalizar(cfg, base);
-    const ok = await copiarTexto(JSON.stringify(out, null, 2) + '\n');
-    if (ok) marcarHecho(ev.currentTarget, 'Ajustes copiados', 'Copiar ajustes para config.json');
+    const b = ev.currentTarget;
+    if (await copiarTexto(JSON.stringify(P.normalizar(cfg, base), null, 2) + '\n')) hecho(b, 'Ajustes copiados', 'Copiar ajustes para config.json');
   });
 
-  // ---------- cadena y resumen ----------
+  // ---------- cadena principal ----------
   function pintarCadena() {
     ultimo = P.construir(DATOS, cfg);
     const tk = $('#tokens'); tk.innerHTML = '';
     document.querySelectorAll('[data-copiar]').forEach((b) => { b.disabled = !ultimo.cadena; });
-    if (!ultimo.cadena) { tk.innerHTML = `<span class="error">${ultimo.error}</span>`; $('#cuenta').textContent = ''; $('#resumen').textContent = ''; return; }
+    if (!ultimo.cadena) { tk.innerHTML = `<span class="error">${ultimo.error}</span>`; $('#cuenta').textContent = ''; $('#resumen').textContent = ''; pintarBusquedas(); return; }
     ultimo.partes.forEach((p, i) => {
       if (i) { const a = document.createElement('span'); a.className = 'amp'; a.textContent = '&'; tk.appendChild(a); }
       const s = document.createElement('span'); s.className = 'tok-' + p.tipo; s.textContent = p.s; tk.appendChild(s);
     });
-    const r = ultimo.resumen;
+    const r = ultimo.resumen, est = cfg.estrellas_papelera;
     $('#cuenta').textContent = num(r.longitud) + ' caracteres';
-    const est = cfg.estrellas_papelera;
+    $('#st-meta').textContent = r.familias_pvp; $('#st-atk').textContent = r.familias_atacantes;
     const rangoEst = est.length > 1 && est[est.length - 1] - est[0] === est.length - 1 ? `de ${est[0]} a ${est[est.length - 1]} estrellas` : est.length === 1 ? `de ${est[0]} estrellas` : `de ${est.join(', ')} estrellas`;
-    const partes = [`Saldrán Pokémon <strong>${rangoEst}</strong>${cfg.pc_maximo ? ` y hasta <strong>${num(cfg.pc_maximo)} PC</strong>` : ''}.`];
     const salva = [];
-    if (r.familias_pvp) salva.push(`los del meta PvP que pueden llegar al <strong>${cfg.pvp_minimo} %</strong> (${r.familias_pvp} familias)`);
+    if (r.familias_pvp) salva.push(`los del meta PvP que llegan al <strong>${cfg.pvp_minimo} %</strong> (${r.familias_pvp} familias)`);
     if (r.familias_atacantes) salva.push(`los atacantes con <strong>${cfg.ataque_minimo_atacantes === 15 ? '15' : '11 o más'}</strong> de ataque (${r.familias_atacantes} familias)`);
     if (r.familias_siempre) salva.push(`${r.familias_siempre === 1 ? 'la familia' : 'las ' + r.familias_siempre + ' familias'} de "siempre guardar"`);
-    partes.push(`Se salvan los especiales, lo etiquetado${salva.length ? ', ' + salva.join(', ').replace(/, ([^,]*)$/, ' y $1') : ''}.`);
-    $('#resumen').innerHTML = partes.join(' ');
+    $('#resumen').innerHTML = `Saldrán Pokémon <strong>${rangoEst}</strong>${cfg.pc_maximo ? ` y hasta <strong>${num(cfg.pc_maximo)} PC</strong>` : ''}. ` +
+      `Se salvan los especiales, lo etiquetado${salva.length ? ', ' + salva.join(', ').replace(/, ([^,]*)$/, ' y $1') : ''}.`;
     $('#pvpmin-nota').textContent = r.familias_pvp
-      ? `Con el ${cfg.pvp_minimo} % te quedas con ${Math.round(r.guardado_pvp * 100)} de cada 100 Pokémon de esas familias. Cuanto más alto, más espacio liberas.`
+      ? `Con el ${cfg.pvp_minimo} % te quedas con ${Math.round(r.guardado_pvp * 100)} de cada 100 Pokémon de esas familias. Cuanto más alto, más espacio liberas.`
       : 'Activa al menos una liga para proteger el meta.';
     pintarBusquedas();
   }
 
+  // ---------- búsquedas rápidas con opciones ----------
+  let bopt = {};
+  try { bopt = JSON.parse(localStorage.getItem(CLAVE_B)) || {}; } catch (_) { bopt = {}; }
+  const guardarB = () => { try { localStorage.setItem(CLAVE_B, JSON.stringify(bopt)); } catch (_) {} };
+  const etiq = (def) => ({ id: 'etiq', label: 'Etiquetados', valores: [['todos', 'Incluir'], ['sin', 'Sin etiqueta']], def });
+  const conEtiq = (o, partes) => { if (o.etiq === 'sin') partes.push('!#'); return partes.join('&'); };
+  const ESTRELLAS_OP = { id: 'est', label: 'Estrellas', valores: [['todas', 'Todas'], ['flojos', '0 a 2★'], ['buenos', '3 y 4★']], def: 'todas' };
+  const conEstrellas = (o, partes) => { if (o.est === 'flojos') partes.push('0*,1*,2*'); else if (o.est === 'buenos') partes.push('3*,4*'); };
+  const CALIDAD = {
+    41: [['3*,4*', '3-4ataque', '3-4defensa', '3-4PS'], 'Salen todos los de 41 a 45 de IV y algunos de 37 a 40 con las tres barras en 11 o más. Es lo más cerca de "más de 40" que permite el buscador.'],
+    '41s': [['3-4ataque', '3-4defensa', '3-4PS', '4ataque,4defensa', '4ataque,4PS', '4defensa,4PS'], 'Todos los que salen tienen 41 o más, pero se escapan algunos que también llegan, como un 14/14/14.'],
+    3: [['3*,4*'], 'Tres estrellas o más: de 37 a 45 de IV.'],
+    a15: [['4ataque', '3*,4*'], 'Ataque al 15 y 37 o más de IV en total.'],
+    4: [['4*'], 'Solo los perfectos, 15/15/15.'],
+    a11: [['3-4ataque'], 'Ataque de 11 a 15, sin mirar el resto.'],
+  };
+  const NOMBRE_LIGA = { liga_500: 'Liga 500', super_ball: 'Super Ball', ultra_ball: 'Ultra Ball', master_ball: 'Master Ball', todas: 'Todas' };
+  const BUSQUEDAS = [
+    {
+      id: 'atacantes', c: 'orange', icono: 'incursion', titulo: 'Atacantes para incursiones', desc: 'Tus mejores atacantes, por tipo y calidad.',
+      opciones: [
+        { id: 'tipo', label: 'Tipo', tipos: true, valores: [['todos', 'Todos']].concat(DATOS.tipos.map((t) => [t.id, t.nombre])), def: 'todos' },
+        { id: 'top', label: 'Cuántos por tipo', valores: [['3', 'Top 3'], ['5', 'Top 5'], ['10', 'Top 10'], ['15', 'Top 15']], def: '10' },
+        { id: 'calidad', label: 'IV', valores: [['41', 'Más de 40 (aprox.)'], ['41s', 'Más de 40 (seguro)'], ['3', '37 o más (3★)'], ['a15', '15 de ataque y 3★'], ['4', 'Solo 100 %'], ['a11', 'Ataque 11+']], def: '41' },
+        { id: 'leg', label: 'Legendarios', valores: [['si', 'Incluir'], ['no', 'Sin legendarios']], def: 'si' },
+        { id: 'oscuros', label: 'Oscuros', valores: [['todos', 'Incluir'], ['solo', 'Solo oscuros'], ['sin', 'Sin oscuros']], def: 'todos' },
+        etiq('todos'),
+      ],
+      construir(o) {
+        const r = P.busquedaAtacantes(DATOS, { tipo: o.tipo, top: Number(o.top), legendarios: o.leg === 'si' });
+        const partes = [r.cadena, ...CALIDAD[o.calidad][0]];
+        if (o.oscuros === 'solo') partes.push('oscuro'); else if (o.oscuros === 'sin') partes.push('!oscuro');
+        return conEtiq(o, partes);
+      },
+      nota: (o) => CALIDAD[o.calidad][1],
+    },
+    {
+      id: 'meta', c: 'blue', icono: 'pvp', titulo: 'Meta PvP por liga', desc: 'Los que valen para PvP, para revisarlos y etiquetarlos.',
+      opciones: [
+        { id: 'liga', label: 'Liga', valores: DATOS.ligas.map((l) => [l.id, NOMBRE_LIGA[l.id] || l.nombre]).concat([['todas', 'Todas']]), def: 'super_ball' },
+        { id: 'minimo', label: 'Mínimo en PvP', valores: [['0', 'Todos'], ['90', '90 %'], ['95', '95 %'], ['98', '98 %']], def: '95' },
+        { id: 'leg', label: 'Legendarios', valores: [['si', 'Incluir'], ['no', 'Sin legendarios']], def: 'si' },
+        etiq('todos'),
+      ],
+      _r(o) {
+        const ligas = o.liga === 'todas' ? DATOS.ligas.map((l) => l.id) : [o.liga];
+        const top = o.liga === 'todas' ? cfg.top_pvp : { [o.liga]: cfg.top_pvp[o.liga] || 50 };
+        return P.busquedaMeta(DATOS, { ligas, top, minimo: Number(o.minimo), legendarios: o.leg === 'si' });
+      },
+      construir(o) { const r = this._r(o); return r.cadena ? conEtiq(o, [r.cadena]) : ''; },
+      nota(o) {
+        const r = this._r(o);
+        if (!r.familias) return 'Activa alguna liga en la sección PvP.';
+        const de = o.liga === 'todas' ? `${r.familias} familias del meta de tus ligas` : `${r.familias} familias del top ${cfg.top_pvp[o.liga] || 50} de PvPoke`;
+        return o.minimo === '0' ? `Todos los Pokémon de las ${de}.` : `${de[0].toUpperCase() + de.slice(1)}: salen todos los que llegan al ${o.minimo} % y algunos que se quedan cerca.`;
+      },
+    },
+    {
+      id: 'listos', c: 'blue', icono: 'escudo', titulo: 'Listos para liga', desc: 'Los que ya están cerca del límite de PC.',
+      opciones: [{ id: 'liga', label: 'Liga', valores: [['500', '500 (450–500)'], ['1500', 'Super (1400–1500)'], ['2500', 'Ultra (2300–2500)']], def: '1500' }, etiq('todos')],
+      construir(o) { return conEtiq(o, [{ 500: 'pc450-500', 1500: 'pc1400-1500', 2500: 'pc2300-2500' }[o.liga]]); },
+    },
+    {
+      id: 'repetidos', c: 'pink', icono: 'lista', titulo: 'Repetidos', desc: 'Quédate con el mejor de cada especie y etiquétalo.',
+      opciones: [
+        { id: 'cuantos', label: 'Copias', valores: [['1', 'Únicos (1)'], ['2', '2 o más'], ['3', '3 o más'], ['5', '5 o más'], ['10', '10 o más']], def: '2' },
+        ESTRELLAS_OP, etiq('sin'),
+      ],
+      construir(o) { const partes = [o.cuantos === '1' ? 'cantidad1' : 'cantidad' + o.cuantos + '-']; conEstrellas(o, partes); return conEtiq(o, partes); },
+      nota: (o) => (o.cuantos === '1' ? 'Los que tienes una sola vez, por número de Pokédex.' : 'Cuenta por número de Pokédex. Salen todas las copias, también la que quieras guardar.'),
+    },
+    {
+      id: 'coleccion', c: 'purple', icono: 'chispa', titulo: 'Joyas y curiosidades', desc: 'Para encontrar lo especial de un vistazo.',
+      opciones: [{ id: 'que', label: 'Buscar', valores: [['4*', '100 %'], ['0ataque&0defensa&0PS', 'Nundos'], ['variocolor', 'Variocolor'], ['xxl', 'XXL'], ['xxs', 'XXS'], ['fondo', 'Con fondo'], ['dinamax', 'Dinamax'], ['gigamax', 'Gigamax'], ['oscuro', 'Oscuros'], ['purificado', 'Purificados']], def: '4*' }],
+      construir(o) { return o.que; },
+    },
+    {
+      id: 'evolucionar', c: 'teal', icono: 'estrella', titulo: 'Pueden evolucionar ya', desc: 'Para una sesión de evoluciones con Huevo Suerte.',
+      opciones: [ESTRELLAS_OP, etiq('todos')],
+      construir(o) { const partes = ['evolucionar']; conEstrellas(o, partes); return conEtiq(o, partes); },
+    },
+  ];
+
   function pintarBusquedas() {
-    const meta = P.dexMeta(DATOS, cfg), atk = P.dexAtacantes(DATOS, cfg);
-    const lista = [
-      ['Meta PvP sin etiquetar', 'Para revisarlos con Poke Genie y etiquetar los buenos.', meta ? meta + '&!#' : ''],
-      ['Atacantes con buen ataque', 'Candidatos a subir para incursiones.', atk ? atk + '&3-4ataque&!#' : ''],
-      ['Los 100 %', 'Tus Pokémon perfectos.', '4*'],
-      ['Nundos', 'Los de 0/0/0.', '0ataque&0defensa&0PS'],
-      ['Listos para Super Ball', 'Entre 1.400 y 1.500 PC.', 'pc1400-1500'],
-      ['Listos para Ultra Ball', 'Entre 2.300 y 2.500 PC.', 'pc2300-2500'],
-      ['Pueden evolucionar ya', 'Para una sesión de Huevo Suerte.', 'evolucionar'],
-      ['XXL y XXS', 'Para exhibiciones.', 'xxl,xxs'],
-    ];
     const cont = $('#busquedas'); cont.innerHTML = '';
-    for (const [t, d, s] of lista) {
-      if (!s) continue;
-      const f = document.createElement('div'); f.className = 'fila';
-      f.innerHTML = '<div class="txt"><b></b><small></small><code></code></div><button type="button" class="mini">Copiar</button>';
-      f.querySelector('b').textContent = t; f.querySelector('small').textContent = d; f.querySelector('code').textContent = s;
-      f.querySelector('button').addEventListener('click', async (ev) => {
-        const b = ev.currentTarget;
-        if (await copiarTexto(s)) { marcarHecho(b, 'Copiada', 'Copiar'); aviso(t + ': copiada'); }
+    for (const b of BUSQUEDAS) {
+      const o = Object.assign({}, ...b.opciones.map((op) => ({ [op.id]: op.def })), bopt[b.id] || {});
+      for (const op of b.opciones) if (!op.valores.some((v) => v[0] === o[op.id])) o[op.id] = op.def;
+      const cadena = b.construir(o);
+      const card = document.createElement('article'); card.className = 'tarjeta busq'; card.dataset.c = b.c; card.dataset.id = b.id;
+      card.innerHTML = `<header><span class="icono">${svg(b.icono)}</span><div><h3></h3><p></p></div></header><div class="opciones"></div><p class="nota-busq" hidden></p><footer><code></code><button type="button" class="mini">Copiar</button></footer>`;
+      card.querySelector('h3').textContent = b.titulo; card.querySelector('p').textContent = b.desc;
+      const ops = card.querySelector('.opciones');
+      for (const op of b.opciones) {
+        const g = document.createElement('div'); g.className = 'grupo-op';
+        g.innerHTML = '<span></span><div class="pills" role="group"></div>'; g.firstChild.textContent = op.label;
+        const pills = g.lastChild; pills.setAttribute('aria-label', op.label); if (op.tipos) pills.classList.add('tipos');
+        for (const [v, t] of op.valores) {
+          const p = pill('', o[op.id] === v, () => { bopt[b.id] = Object.assign({}, o, { [op.id]: v }); guardarB(); pintarBusquedas(); }, null, op.tipos && v !== 'todos' ? 'tipo' : '');
+          p.textContent = t; if (op.tipos && v !== 'todos') p.style.setProperty('--tc', COLORES_TIPO[v] || '#999');
+          pills.appendChild(p);
+        }
+        ops.appendChild(g);
+      }
+      if (b.nota) { const n = card.querySelector('.nota-busq'); n.textContent = b.nota(o); n.hidden = false; }
+      card.querySelector('code').textContent = cadena || '—';
+      const mini = card.querySelector('.mini');
+      mini.setAttribute('aria-label', 'Copiar: ' + b.titulo); mini.disabled = !cadena;
+      mini.addEventListener('click', async () => {
+        if (await copiarTexto(cadena)) { hecho(mini, '¡Copiada!', 'Copiar'); chispas(mini); aviso(b.titulo + ': copiada'); }
       });
-      cont.appendChild(f);
+      cont.appendChild(card);
     }
   }
 
+  // ---------- listas ----------
   function pintarListas() {
-    const meta = $('#meta'); meta.innerHTML = '';
-    let total = 0;
+    const meta = $('#meta'); meta.innerHTML = ''; const total = new Set();
     for (const l of DATOS.ligas) {
-      const top = cfg.top_pvp[l.id] || 0;
-      const items = l.ranking.filter((e) => e.r <= top);
-      if (!items.length) continue;
-      total += items.length;
+      const top = cfg.top_pvp[l.id] || 0, items = l.ranking.filter((e) => e.r <= top && !e.l);
+      if (!items.length) continue; items.forEach((e) => total.add(e.f));
       const d = document.createElement('div'); d.className = 'liga';
-      d.innerHTML = '<h3></h3><ol class="rank"></ol>';
-      d.querySelector('h3').textContent = `${l.nombre}, top ${top}`;
-      const ol = d.querySelector('ol');
+      d.innerHTML = '<h4></h4><ol class="rank"></ol>'; d.firstChild.textContent = `${l.nombre}, top ${top}`;
       for (const e of items) {
-        const li = document.createElement('li');
-        li.innerHTML = '<span></span><b></b>';
-        li.firstChild.textContent = e.r; li.lastChild.textContent = e.n.join(', '); li.lastChild.style.fontWeight = '500';
-        ol.appendChild(li);
+        const li = document.createElement('li'); li.innerHTML = '<span></span><b></b>';
+        li.firstChild.textContent = e.r; li.lastChild.textContent = e.n.join(', '); li.lastChild.style.fontWeight = '600';
+        d.lastChild.appendChild(li);
       }
       meta.appendChild(d);
     }
-    $('#sum-meta').textContent = total ? `Meta PvP (${total} especies)` : 'Meta PvP (ninguna liga activa)';
-    const atk = $('#atk'); atk.innerHTML = '';
-    const n = cfg.top_atacantes_por_tipo;
-    for (const t of DATOS.tipos) {
-      if (!n) break;
-      const d = document.createElement('div'); d.className = 'tipo'; d.style.setProperty('--tc', COLORES_TIPO[t.id] || '#999');
-      d.innerHTML = '<b></b><span></span>';
-      d.firstChild.textContent = t.nombre; d.lastChild.textContent = t.top.slice(0, n).map((a) => a.n).join(', ');
+    $('#sum-meta').textContent = total.size ? `Meta PvP (${total.size} familias, sin legendarios)` : 'Meta PvP (ninguna liga activa)';
+    const atk = $('#atk'); atk.innerHTML = ''; const n = cfg.top_atacantes_por_tipo;
+    if (n) for (const t of DATOS.tipos) {
+      const d = document.createElement('div'); d.className = 'tipo-fila'; d.style.setProperty('--tc', COLORES_TIPO[t.id] || '#999');
+      d.innerHTML = '<b></b><span></span>'; d.firstChild.textContent = t.nombre; d.lastChild.textContent = P.topTipo(t, n, false).map((a) => a.n).join(', ');
       atk.appendChild(d);
     }
     $('#sum-atk').textContent = n ? `Atacantes por tipo (top ${n})` : 'Atacantes por tipo (desactivado)';
@@ -567,12 +776,12 @@ footer .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
 
   function pintar() { pintarControles(); pintarCadena(); pintarListas(); }
 
-  // datalist de especies
   const dl = $('#lista-especies');
   for (const e of DATOS.especies) { const o = document.createElement('option'); o.value = e[1]; dl.appendChild(o); }
-  const f = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-  $('#fechas').textContent = `Actualizada el ${f(DATOS.generada)} a las ${new Date(DATOS.generada).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}.` +
-    (DATOS.datos_juego ? ` Datos de incursiones del ${f(DATOS.datos_juego)}.` : '');
+  const fecha = (iso) => new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+  $('#st-fecha').textContent = 'Datos del ' + new Date(DATOS.generada).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }).replace('.', '');
+  $('#fechas').textContent = `Actualizada el ${fecha(DATOS.generada)} a las ${new Date(DATOS.generada).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}.` +
+    (DATOS.datos_juego ? ` Ataques y estadísticas del juego del ${fecha(DATOS.datos_juego)}.` : '');
   pintar();
 })();
 </script>

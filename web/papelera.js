@@ -18,7 +18,7 @@
     proteger: {
       variocolor: true, oscuro: true, legendario: true, singular: true, ultraentes: true, disfraz: true,
       fondo: true, dinamax: true, gigamax: true, especial: true, intercambiados: true, etiquetados: true,
-      listos_para_liga: false, nundos: false, tamanos: false, evolucionables: false,
+      listos_para_liga: false, nundos: false, tamanos: false, evolucionables: false, unicos: false,
     },
   };
 
@@ -118,7 +118,7 @@
     for (const liga of datos.ligas) {
       const top = cfg.top_pvp[liga.id] || 0;
       for (const e of liga.ranking) {
-        if (e.r > top) continue;
+        if (e.r > top || e.l) continue; // los legendarios ya los protege !legendario
         const m = reg.get(e.f) || new Uint32Array(4);
         for (let k = 0; k < e.t.length; k += 2) if (e.t[k + 1] >= T) m[e.t[k] >> 5] |= 1 << (e.t[k] & 31);
         reg.set(e.f, m);
@@ -127,10 +127,14 @@
     return reg;
   }
 
+  // Los mejores atacantes de un tipo. Los legendarios (marcados con l) solo cuentan si se piden:
+  // en la papelera ya los protege !legendario.
+  const topTipo = (t, n, legendarios) => t.top.filter((a) => legendarios || !a.l).slice(0, n);
+
   function familiasAtacantes(datos, cfg) {
     const out = new Set();
     if (!(cfg.top_atacantes_por_tipo > 0) || !cfg.ataque_minimo_atacantes) return out;
-    for (const t of datos.tipos) for (const a of t.top.slice(0, cfg.top_atacantes_por_tipo)) out.add(a.f);
+    for (const t of datos.tipos) for (const a of topTipo(t, cfg.top_atacantes_por_tipo, false)) out.add(a.f);
     return out;
   }
 
@@ -148,6 +152,7 @@
     if (p.evolucionables) add('extra', '!evolucionar');
     if (p.listos_para_liga) add('extra', '!pc1400-1500', '!pc2300-2500');
     if (p.nundos) add('extra', '1-4ataque,1-4defensa,1-4PS');
+    if (p.unicos) add('extra', '!cantidad1');
 
     const siempre = familiasDe(datos, cfg.siempre_guardar);
     const dexSiempre = [];
@@ -190,7 +195,108 @@
     };
   }
 
-  // Búsquedas extra: Pokémon del meta o atacantes, en positivo.
+  // ---------- búsquedas en positivo ----------
+  const EJES = ['ataque', 'defensa', 'PS'];
+  const LLENO = 31; // las 5 bandas
+  function textoLiteral([eje, m]) { // bandas del eje -> "0-1ataque,3-4ataque"
+    const t = [];
+    for (let i = 0; i < 5; i++) {
+      if (!(m >> i & 1)) continue;
+      let j = i;
+      while (j + 1 < 5 && (m >> (j + 1) & 1)) j++;
+      t.push((i === j ? i : i + '-' + j) + EJES[eje]);
+      i = j;
+    }
+    return t.join(',');
+  }
+  const literalesCaja = (c) => {
+    const out = [];
+    let ma = 0;
+    for (let a = c.a0; a <= c.a1; a++) ma |= 1 << a;
+    if (ma !== LLENO) out.push([0, ma]);
+    if (c.d0 > 0) out.push([1, LLENO & ~((1 << c.d0) - 1)]);
+    if (c.h0 > 0) out.push([2, LLENO & ~((1 << c.h0) - 1)]);
+    return out;
+  };
+  // "Está dentro de las cajas" en forma de cláusulas (Y de O), como pide el buscador del juego.
+  function clausulasCajas(cajas) {
+    const x = literalesCaja(cajas[0]);
+    if (cajas.length === 1) return x.map((l) => [l]);
+    const y = literalesCaja(cajas[1]);
+    if (!x.length || !y.length) return [];
+    const out = [];
+    for (const lx of x) for (const ly of y) {
+      if (lx[0] === ly[0]) {
+        const m = lx[1] | ly[1];
+        if (m !== LLENO) out.push([[lx[0], m]]);
+      } else out.push(lx[0] < ly[0] ? [lx, ly] : [ly, lx]);
+    }
+    return out;
+  }
+  // Rangos de Pokédex que incluyen todos los "si", ninguno de los "no" y lo que sea en el resto.
+  function rangosCon(si, no) {
+    const puntos = [];
+    for (const d of si) puntos.push([d, 1]);
+    for (const d of no) puntos.push([d, 0]);
+    puntos.sort((a, b) => a[0] - b[0]);
+    const out = [];
+    let actual = null;
+    for (const [d, bueno] of puntos) {
+      if (!bueno) { actual = null; continue; }
+      if (actual) actual[1] = d; else out.push(actual = [d, d]);
+    }
+    return out;
+  }
+
+  // Pokémon de las familias del meta que pueden llegar al mínimo de % en esas ligas.
+  // Sale todo el que llega y algunos que se quedan cerca: el buscador solo ve las barras.
+  function busquedaMeta(datos, op) {
+    const T = Math.round((op.minimo || 0) * 10);
+    const reg = new Map();
+    for (const liga of datos.ligas) {
+      const top = (op.top || {})[liga.id] || 0;
+      if (!op.ligas.includes(liga.id) || !top) continue;
+      for (const e of liga.ranking) {
+        if (e.r > top || (e.l && !op.legendarios)) continue;
+        const m = reg.get(e.f) || new Uint32Array(4);
+        if (T) for (let k = 0; k < e.t.length; k += 2) if (e.t[k + 1] >= T) m[e.t[k] >> 5] |= 1 << (e.t[k] & 31);
+        reg.set(e.f, m);
+      }
+    }
+    const todas = [];
+    for (const f of reg.keys()) todas.push(...datos.familias[f]);
+    if (!todas.length) return { cadena: '', familias: 0 };
+    const partes = [rangos(todas).map(txt).join(',')];
+    if (T) {
+      const grupos = new Map();
+      for (const [f, r] of reg) {
+        for (const cl of clausulasCajas(cubrir(r).cajas)) {
+          const k = JSON.stringify(cl);
+          if (!grupos.has(k)) grupos.set(k, { cl, dex: new Set() });
+          for (const d of datos.familias[f]) grupos.get(k).dex.add(d);
+        }
+      }
+      for (const k of Array.from(grupos.keys()).sort()) {
+        const { cl, dex } = grupos.get(k);
+        const fuera = rangosCon(todas.filter((d) => !dex.has(d)), dex).map(txt);
+        partes.push(fuera.concat(cl.map(textoLiteral)).join(','));
+      }
+    }
+    return { cadena: partes.join('&'), familias: reg.size };
+  }
+
+  // Familias de los mejores atacantes de un tipo (o de todos), en rangos de Pokédex.
+  function busquedaAtacantes(datos, op) {
+    const fams = new Set();
+    for (const t of datos.tipos) {
+      if (op.tipo && op.tipo !== 'todos' && op.tipo !== t.id) continue;
+      for (const a of topTipo(t, op.top || 10, !!op.legendarios)) fams.add(a.f);
+    }
+    const dex = [];
+    for (const f of fams) dex.push(...datos.familias[f]);
+    return { cadena: rangos(dex).map(txt).join(','), familias: fams.size };
+  }
+
   function dexMeta(datos, cfg) {
     cfg = normalizar(cfg, datos.config);
     const dex = [];
@@ -204,7 +310,7 @@
     return rangos(dex).map(txt).join(',');
   }
 
-  const api = { construir, normalizar, dexMeta, dexAtacantes, POR_DEFECTO, ESPECIALES };
+  const api = { construir, normalizar, dexMeta, dexAtacantes, busquedaMeta, busquedaAtacantes, topTipo, rangos, txt, POR_DEFECTO, ESPECIALES };
   root.Papelera = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

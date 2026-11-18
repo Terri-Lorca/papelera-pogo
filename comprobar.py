@@ -44,6 +44,9 @@ def cumple(t, pk):
     elif m := re.fullmatch(r'(\d)(?:-(\d))?(ataque|defensa|PS)', t):
         lo, hi = int(m.group(1)), int(m.group(2) or m.group(1))
         r = lo <= banda(pk['iv'][{'ataque': 0, 'defensa': 1, 'PS': 2}[m.group(3)]]) <= hi
+    elif m := re.fullmatch(r'cantidad(\d*-?\d*)', t):
+        lo, hi = rango(m.group(1)) if m.group(1) else (2, 10 ** 6)
+        r = lo <= pk.get('cantidad', 2) <= hi
     elif re.fullmatch(r'\d+(-\d+)?', t):
         lo, hi = rango(t)
         r = lo <= pk['dex'] <= hi
@@ -71,7 +74,7 @@ buenas = {}
 for liga in datos['ligas']:
     top = cfg['top_pvp'].get(liga['id'], 0)
     for e in liga['ranking']:
-        if e['r'] <= top:
+        if e['r'] <= top and not e.get('l'):  # los legendarios los protege !legendario
             t = e['t']
             buenas.setdefault(e['f'], set()).update(t[i] for i in range(0, len(t), 2) if t[i + 1] >= T)
 malas, total_fuera, en_papelera = [], 0, 0
@@ -92,7 +95,7 @@ check(f'el filtro PvP sí quita algo ({en_papelera} de {total_fuera} bandas floj
 amin = cfg.get('ataque_minimo_atacantes', 11)
 n = cfg.get('top_atacantes_por_tipo', 0)
 if n and amin:
-    fams = {a['f'] for t in datos['tipos'] for a in t['top'][:n]}
+    fams = {a['f'] for t in datos['tipos'] for a in [x for x in t['top'] if not x.get('l')][:n]}
     malos = [f for f in fams if papelera({'dex': datos['familias'][f][0], 'iv': (amin, 1, 1)})]
     check(f'ningún atacante con {amin}+ de ataque va a la papelera ({len(fams)} familias)', not malos)
 
@@ -113,6 +116,8 @@ check('los etiquetados se quedan', not papelera({'dex': libre, 'iv': (1, 2, 3), 
 if cfg.get('pc_maximo'):
     check(f"los de más de {cfg['pc_maximo']} PC se quedan",
           not papelera({'dex': libre, 'iv': (1, 2, 3), 'pc': cfg['pc_maximo'] + 1}))
+if cfg.get('proteger', {}).get('unicos'):
+    check('el único de su especie se queda', not papelera({'dex': libre, 'iv': (1, 2, 3), 'cantidad': 1}))
 porid = {e[0]: e for e in datos['especies']}
 for sid in cfg.get('siempre_guardar', []):
     if sid in porid:

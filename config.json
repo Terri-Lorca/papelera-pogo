@@ -27,6 +27,7 @@
     "listos_para_liga": false,
     "nundos": false,
     "tamanos": false,
-    "evolucionables": false
+    "evolucionables": false,
+    "unicos": false
   }
 }

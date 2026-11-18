@@ -20,6 +20,7 @@ import json
 import math
 import os
 import re
+import shutil
 import sys
 from collections import defaultdict
 
@@ -148,9 +149,9 @@ for lid, nombre, fichero, tope in LIGAS:
         p = pv_por_id.get(e['speciesId'])
         if not p:
             continue
-        fam = familia(p['dex'])
-        if all(d in dex_especiales for d in fam):  # ya protegidos por !legendario, etc.
-            continue
+        # Los legendarios van marcados: la papelera ya los protege con !legendario, etc.,
+        # pero la búsqueda del meta los ofrece.
+        legendaria = all(d in dex_especiales for d in familia(p['dex']))
         bs = p['baseStats']
         clave = (bs['atk'], bs['def'], bs['hp'], tope)
         if clave not in tablas:
@@ -159,6 +160,8 @@ for lid, nombre, fichero, tope in LIGAS:
         ent = entradas.get((lid, fi))
         if ent is None:
             ent = entradas[(lid, fi)] = {'r': rango, 'f': fi, 'n': [], '_t': {}}
+            if legendaria:
+                ent['l'] = 1
             lista.append(ent)
         ent['n'].append(p['speciesName'])
         for k, v in tablas[clave].items():
@@ -207,7 +210,7 @@ def bonito(nombre):
 puntuaciones = defaultdict(list)
 for s in pokes:
     dex = s['_dex']
-    if dex in dex_especiales or dex not in dex_publicados or not (s.get('stats') or {}).get('baseAttack'):
+    if dex not in dex_publicados or not (s.get('stats') or {}).get('baseAttack'):
         continue
     variantes = [(s['stats'], {s.get('type'), s.get('type2')}, s.get('form') or s.get('pokemonId'))]
     for o in s.get('tempEvoOverrides') or []:
@@ -216,6 +219,8 @@ for s in pokes:
                               f"{o['tempEvoId'].replace('TEMP_EVOLUTION_', '')} {s.get('pokemonId')}"))
     rapidos, cargados = ataques(s, True), ataques(s, False)
     for stats, tipos, nombre in variantes:
+        if 'ETERNAMAX' in str(nombre):  # solo existe en combates Max, no se puede usar en incursiones
+            continue
         for t in TIPOS:
             pt = f'POKEMON_TYPE_{t}'
             mejor = max((rating(stats, tipos, f, c) or 0 for f in rapidos if f['pokemonType'] == pt
@@ -225,14 +230,17 @@ for s in pokes:
 
 tipos_out = []
 for t, nombre_tipo in TIPOS.items():
-    vistas, top = set(), []
+    vistas, top, normales = set(), [], 0
     for _, nombre, dex in sorted(puntuaciones[t], key=lambda x: (-x[0], len(x[1]))):  # empate: forma normal
         fi = id_familia(dex)
         if fi in vistas:
             continue
         vistas.add(fi)
-        top.append({'n': nombre, 'f': fi})
-        if len(top) == TOP_MAX_ATACANTES:
+        # Los legendarios van marcados: la papelera ya los protege, pero la búsqueda de atacantes los ofrece.
+        legendario = dex in dex_especiales
+        top.append({'n': nombre, 'f': fi, 'l': 1} if legendario else {'n': nombre, 'f': fi})
+        normales += not legendario
+        if normales == TOP_MAX_ATACANTES:
             break
     tipos_out.append({'id': t.lower(), 'nombre': nombre_tipo, 'top': top})
 
@@ -271,5 +279,6 @@ motor = open(os.path.join(AQUI, 'web', 'papelera.js'), encoding='utf-8').read()
 pagina = (plantilla.replace('/*__PAPELERA_JS__*/', motor)
           .replace('"__DATOS__"', texto.replace('</', '<\\/')))
 open(os.path.join(SALIDA, 'index.html'), 'w', encoding='utf-8').write(pagina)
+shutil.copytree(os.path.join(AQUI, 'web', 'estaticos'), SALIDA, dirs_exist_ok=True)  # fuentes e icono
 print(f'OK · {len(ligas_out)} ligas · {sum(len(l["ranking"]) for l in ligas_out)} entradas PvP · '
       f'{len(familias)} familias · datos.json {len(texto) // 1024} KB')
